@@ -1,0 +1,135 @@
+Lemonldap/Handlers/Generic version 0.01
+=======================================
+
+NAME
+    Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
+
+SYNOPSIS
+    In httpd.conf
+
+    <location mylocation> Lemonldap::Handlers::Generic;
+
+    </locaction>
+
+DESCRIPTION
+
+  Parameters
+
+   LemonldapXML "/foo/bar/file_config.xml"
+    The filename of the mean XML Config :It's REQUIRED
+
+   LemonldapDomain foo.bar
+    If present , it fixes the value of domain for the application protected
+    by this handler (see below)
+
+   LemonldapHandlerId  <xml section>
+    If present the configuration of handler is read from XML config backend.
+    You can overlay XML config backend with httpd.conf
+
+   LemonldapEnabledproxy  0|1
+    0 : don't use built-in proxy (configuration must use with mod_proxy or
+    mod_rewrite ) 1 : use built-in proxy default : 0
+
+   LemonldapLogDEBUG  0|1
+    0 : mode debug disabled 1 : mode debug enabled default : 0
+
+   LemonldapIPCNB     0..nn
+    IPNB is the number of session which you want to keep in cache evel 2
+    (IPC)
+
+    min value : 0 (don't use cache IPC level2) max value : ??? : It depends
+    of your server recommended : 100 The youngest value replace the oldest .
+
+   LemonldapIPCKey   '4 carac'
+    A string of 4 caracteres (see IPC::Shareable doc) It must be 'unique' .
+
+   LemonldapAttrLDAP  'string'
+    The first level of hash session , whi can to be the name of LDAP
+    attribute see below
+
+   LemonldapCodeAppli 'string'
+    The second level of hash session , whi can to be the code of application
+    The access of %session if
+    $session{LemonldapAttrLDAP}{lemonldapCodeAppli} with the value of key =
+    profil .
+
+   LemonldapDisabled  0|1
+    0 : Control the request (default) 1 : Don't control the request (useful
+    for jpeg )
+
+   LemonldapSTOPCOOKIE  0|1
+    0 : Let pass the lemonldap cookie to application (default). 1 : Block
+    the lemonldap cookie.
+
+   LemonldapRECURSIF  0|1
+    0 : Let LWP chases redirection (default). 1 : Let Client chases
+    redirection instead LWP.
+
+   LemonldapProxyExt  0|1
+    0 : Let LWP resquets on ressource (default). 1 : force LWP to request
+    via an external proxy.
+
+   LemonldapCache  'cachelevel 3'
+    It is the name of XML section which describes the backend used in order
+    to store the session .
+
+   LemonldapCookie 'name_of_cookie'
+     eg: lemontest
+ 
+   LemonldapBasePub
+    The public host name avaiable by user
+
+   LemonldapBasePriv
+    The private host name not avaiable by user
+
+   LemonldapPortal
+    The url of login page
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+
+
+SEE ALSO
+    Lemonldap(3), Lemonldap::Portal::Standard
+
+    http://lemonldap.sourceforge.net/
+
+    "Writing Apache Modules with Perl and C" by Lincoln Stein & Doug
+    MacEachern - O'REILLY
+
+    Eric German, <germanlinux@yahoo.fr>
+    Xavier Guimard, <x.guimard@free.fr>
+
+COPYRIGHT AND LICENSE
+    Copyright (C) 2004 by Eric German & Xavier Guimard
+
+    Lemonldap originaly written by Eric german who decided to publish him in
+    2003 under the terms of the GNU General Public License version 2.
+
+    This package is under the GNU General Public License, Version 2.
+    The primary copyright holder is Eric German.
+    Portions are copyrighted under the same license as Perl itself.
+    Portions are copyrighted by Doug MacEachern and Lincoln Stein. This
+    library is under the GNU General Public License, Version 2.
+      This program is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; version 2 dated June, 1991.
+
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      A copy of the GNU General Public License is available in the source tree;
+      if not, write to the Free Software Foundation, Inc.,
+      59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+

@@ -1,0 +1,71 @@
+<lemonconfig>
+<menu>
+
+     <rubrique id="rb1"
+               name="Applications DGI/DGCP">
+          <appli id="OCT"
+                 name="Intranet commun DGI/DGCP"
+                 url="http:/icc.int.appli.cp/icc/index.php"
+                 >
+          </appli>
+          <appli id="cpc"
+                 name="CPC"
+                 url="http://lancelotcpc.appli.cp/cpc/init.php"
+                 >
+          </appli>
+     </rubrique>
+
+
+</menu>
+
+<domain    name="appli.dgi"
+           cookie="lemon"
+           path ="/"
+           templates_dir="/opt/apache_dev/dgi/templates"
+           templates_options =  "ABSOLUTE     => '1', INCLUDE_PATH => 'templates_dir'"
+           login ="http://cpportail.appli.dgi/portailtest/accueil_obj.pl"
+           menu= "http://cpportail.appli.dgi/portailtest/application_new.pl"
+           ldap_server ="10.ip.ip.ip"
+           ldap_port="389"
+           DnManager= "cn=Directory Manager"
+           passwordManager="secret"
+           ldap_branch_people="ou=mefi,o=gouv,c=fr"
+           session="memcached"
+          >
+<handler  name="exemple" 
+          Enabledproxy='0'
+	  IPCNB ='0'
+	  IPCKey='PR62'
+	  AttrLDAP= 'mefiapplidgi'
+	  CodeAppli='ADE'
+	  Disabled ='0' 
+	  BasePub ='http:/public.server.appli.dgi' 
+	  BasePriv ='http://private.server.appli.dgi' 
+	  >  
+	      
+</domain>
+<domain    name="appli.cp"
+           cookie="lemoncp"
+           path ="/"
+           templates_dir="/opt/apache_dev/cp/templates"
+           templates_options =  "ABSOLUTE     => '1', INCLUDE_PATH => 'templates_dir'"
+           login ="http://cpportail.appli.cp/portailtest/accueil_obj.pl"
+           menu= "http://cpportail.appli.cp/portailtest/application_new.pl"
+           ldap_server ="10.ip.ip.ip"
+           ldap_port="389"
+           DnManager= "cn=Directory Manager"
+           passwordManager="secret"
+           ldap_branch_people="ou=mefi,o=gouv,c=fr"
+           session="memcached"
+           slavecda="http://lemon-dev.appli.cp/cp/mycdaslave.pl"
+           
+          >
+</domain>
+<cache type="IPC"  name="CONF" ttl="1000">
+</cache>
+<session    name="memcached" 
+            type="memcached"
+            servers="['10.ip.ip.ip:11211']">
+</session>
+
+</lemonconfig>

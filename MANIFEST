@@ -1,0 +1,9 @@
+Changes
+Generic.pm
+Makefile.PL
+MANIFEST
+README
+eg/application_new.xml
+eg/httpd.conf
+t/1.t
+META.yml                                Module meta-data (added by MakeMaker)
