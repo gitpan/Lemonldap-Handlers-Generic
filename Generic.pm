@@ -17,9 +17,9 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.04';
+$VERSION = '0.05';
 our $VERSION_LEMONLDAP="1.1" ;
-our $VERSION_INTERNAL="0.03-2" ;
+our $VERSION_INTERNAL="0.03-3" ;
 
 ####
 ####
@@ -88,6 +88,7 @@ print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:fa
 	unless ($ID_HANDLER eq $ID_HANDLER_IN_PROCESS ) {
 ## It doesn t be in the same context ; 
 	    undef $LDAPCONTROL;
+            undef $CLIENT;
 	}
 ## now I save the context of handler
 	$ID_HANDLER_IN_PROCESS =$ID_HANDLER;
