@@ -17,9 +17,9 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.03';
+$VERSION = '0.04';
 our $VERSION_LEMONLDAP="1.1" ;
-our $VERSION_INTERNAL="0.03-1" ;
+our $VERSION_INTERNAL="0.03-2" ;
 
 ####
 ####
@@ -54,10 +54,10 @@ our $ID_HANDLER_IN_PROCESS;
 our $NOM=  __PACKAGE__ ;
 #############################
 @ISA = qw(LWP::UserAgent );
-if($ENV{MOD_PERL}) {
-	push @ISA, 'Dynaloader';
-	__PACKAGE__->bootstrap($VERSION);
-			}
+#if($ENV{MOD_PERL}) {
+#	push @ISA, 'Dynaloader';
+#	__PACKAGE__->bootstrap($VERSION);
+#			}
 #Apache->push_handlers( PerlChildInitHandler=>\&childInit );
 
 ###############################

@@ -10,4 +10,6 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.03  Thu Mar 10 2005
         - correct big bug in id_handlers config  namage
         - correct syntax in option
-        - correct display for debug  
+        - correct display for debug 
+0.04  Fri Mar 11 2005
+        - delete dynaloader  
