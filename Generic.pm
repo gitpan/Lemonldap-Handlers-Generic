@@ -17,9 +17,9 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.05';
+$VERSION = '0.06';
 our $VERSION_LEMONLDAP="1.1" ;
-our $VERSION_INTERNAL="0.03-3" ;
+our $VERSION_INTERNAL="0.03-4" ;
 
 ####
 ####
@@ -488,6 +488,13 @@ print STDERR  "$ID_HANDLER:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
     $response->scan(sub {
 	$r->headers_out->add(@_);
     });
+if ($r->header_out('Location')) {
+  my $h =$r->header_out('Location');
+   $h=~ s/$BASEPRIV/$BASEPUB/ ;
+$r->header_out('Location' => $h);
+}
+
+
 
     if ($r->header_only) {
 	$r->send_http_header();

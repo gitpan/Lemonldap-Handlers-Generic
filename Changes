@@ -15,3 +15,5 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - delete dynaloader  
 0.05  Fri Mar 11 2005
         - undef cache level 1 for different naming context  
+0.06  Tue Mar 15 2005
+        - modify header "Location" of response application 
