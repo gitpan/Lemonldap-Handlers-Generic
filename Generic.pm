@@ -6,7 +6,7 @@ use Apache();
 use Apache::URI();
 use Apache::Constants qw(:common :response);
 use Apache::Session::Memorycached;
-use Apache::ModuleConfig;
+#use Apache::ModuleConfig;
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
@@ -17,9 +17,9 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.02';
-our $VERSION_LEMONLDAP="1.0" ;
-our $VERSION_INTERNAL="0.02-3" ;
+$VERSION = '0.03';
+our $VERSION_LEMONLDAP="1.1" ;
+our $VERSION_INTERNAL="0.03-1" ;
 
 ####
 ####
@@ -50,9 +50,10 @@ our $STOPCOOKIE;
 our $RECURSIF;
 our $CACHE1_ENTETE;
 our $GENERAL;
+our $ID_HANDLER_IN_PROCESS;
 our $NOM=  __PACKAGE__ ;
 #############################
-@ISA = qw(LWP::UserAgent Apache::ModuleConfig);
+@ISA = qw(LWP::UserAgent );
 if($ENV{MOD_PERL}) {
 	push @ISA, 'Dynaloader';
 	__PACKAGE__->bootstrap($VERSION);
@@ -70,35 +71,55 @@ sub handler {
 	my $r=shift;
 #### retrieve directive and build variables
 #### but I 'll try it one time 
-if ($LDAPCONTROL) {  
-print STDERR "$NOM: Phase : handler initialization one step beyond\n" if $DEBUG ; 
-}
-unless ($LDAPCONTROL) {
-
-$DEBUG = $r->dir_config('LemonldapDEBUG')  ;
-print STDERR "$NOM: Phase : handler initialization DEBUG => $DEBUG\n" if $DEBUG ; 
-print STDERR "$NOM: Phase : handler initialization LOAD XML file from  httpd.conf\n" if $DEBUG ; 
-### I will try  retieve XML  from  httpd conf 
-$FILE = $r->dir_config('LemonldapConfig');
-$GLUE = $r->dir_config('LemonldapConfigIpcKey');
-
-print STDERR "$NOM: Phase : handler initialization LOAD XML file $FILE and $GLUE from  httpd.conf\n" if $DEBUG ; 
-
-### retrieve domain xml 
-print STDERR "$NOM: Phase : handler initialization LOAD DOMAIN  httpd.conf\n" if $DEBUG ; 
-### I will try  retieve domain  from  httpd conf 
-$DOMAIN = $r->dir_config('LemonldapDomain');
-####
-print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf\n" if $DEBUG ; 
+# I must know if the handler is call in the same  virtualhost ou contener
+#
+#
 ### I will try  retieve ID_HANDLER from  httpd conf 
 $ID_HANDLER = $r->dir_config('LemonldapHandlerId');
       if  ($ID_HANDLER) {
 print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:$ID_HANDLER : succeded\n" if $DEBUG ; 
 
   } else { 
- # I don't find anything for this handler in order to make link with XLM conf section
+# I don't find anything for this handler in order to make link with XLM conf section
 print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:failed\n" if $DEBUG ; 
  } 
+############################################
+
+	unless ($ID_HANDLER eq $ID_HANDLER_IN_PROCESS ) {
+## It doesn t be in the same context ; 
+	    undef $LDAPCONTROL;
+	}
+## now I save the context of handler
+	$ID_HANDLER_IN_PROCESS =$ID_HANDLER;
+if ($LDAPCONTROL) {  
+print STDERR "$ID_HANDLER: Phase : handler initialization one step beyond\n" if $DEBUG ; 
+}
+unless ($LDAPCONTROL) {
+
+$DEBUG = $r->dir_config('LemonldapDEBUG')  ;
+print STDERR "$ID_HANDLER: Phase : handler initialization DEBUG => $DEBUG\n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD XML file from  httpd.conf\n" if $DEBUG ; 
+### I will try  retieve XML  from  httpd conf 
+$FILE = $r->dir_config('LemonldapConfig');
+$GLUE = $r->dir_config('LemonldapConfigIpcKey');
+
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD XML file $FILE and $GLUE from  httpd.conf\n" if $DEBUG ; 
+
+### retrieve domain xml 
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD DOMAIN  httpd.conf\n" if $DEBUG ; 
+### I will try  retieve domain  from  httpd conf 
+$DOMAIN = $r->dir_config('LemonldapDomain');
+####
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD ID_HANDLER httpd.conf\n" if $DEBUG ; 
+### I will try  retieve ID_HANDLER from  httpd conf 
+#$ID_HANDLER = $r->dir_config('LemonldapHandlerId');
+#      if  ($ID_HANDLER) {
+#print STDERR "$ID_HANDLER: Phase : handler initialization LOAD ID_HANDLER httpd.conf:$ID_HANDLER : succeded\n" if $DEBUG ; 
+#
+ # } else { 
+# I don't find anything for this handler in order to make link with XLM conf section
+#print STDERR "$ID_HANDLER: Phase : handler initialization LOAD ID_HANDLER httpd.conf:failed\n" if $DEBUG ; 
+ #} 
 ##### now I'll load conf from XML file 
 ####  sereval  cases 
 #### I have domain but nothing for id_handler in httpd.conf
@@ -106,20 +127,20 @@ print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:fa
 #### I have both
 ####  Normaly the cookie is  got from domain 
 ####  I 'll try to load domain ONLY if httpd.conf don't have domain 
-print STDERR "$NOM: Phase : handler initialization try to load XML conf\n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler initialization try to load XML conf\n" if $DEBUG ; 
 $CONF= Lemonldap::Config::Parameters->new (
                                                 file => $FILE ,
 					      cache => $GLUE );
 	if ($CONF) {
-print STDERR "$NOM: Phase : handler initialization LOAD XML conf :succeded \n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD XML conf :succeded \n" if $DEBUG ; 
 } else {
-print STDERR "$NOM: Phase : handler initialization LOAD XML conf : failed \n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD XML conf : failed \n" if $DEBUG ; 
  
 }
 
 
 ### here conf from XML is ready 
-print STDERR "$NOM: Phase : handler initialization LOAD XML conf\n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler initialization LOAD XML conf\n" if $DEBUG ; 
 ### I'll search XML section from ID_HANDLER
 
 if ($ID_HANDLER) {
@@ -182,7 +203,7 @@ $PROXYEXT=$_proxyext  if $_proxyext;
 #
 #
 # Result 
-print STDERR "$NOM: Phase : handler initialization VARIABLES
+print STDERR "$ID_HANDLER: Phase : handler initialization VARIABLES
 PROXY           => $PROXY
 KEYIPC          => $KEYIPC
 IPCNB           => $IPCNB
@@ -196,13 +217,13 @@ STOPCOOKIE      => $STOPCOOKIE\n" if $DEBUG ;
 ##### end of initialization 
 ## deleted those line  
 my $uri =$r->uri;
-print STDERR "$NOM :uri  requested: $uri\n";
+print STDERR "$ID_HANDLER :uri  requested: $uri\n";
 ##### end deleted lines 
 	if($PROXY){
 $UA = __PACKAGE__->new;
 $UA->agent(join "/", __PACKAGE__, $VERSION);
 	
-       print STDERR "$NOM:  Build-in proxy actived\n" ;
+       print STDERR "$ID_HANDLER:  Build-in proxy actived\n" ;
         $r->handler("perl-script");
         $r->push_handlers( PerlHandler => \&proxy_handler );
 	}
@@ -225,7 +246,7 @@ $BASEPRIV=$_basepriv  if $_basepriv;
 my $_portal= $r->dir_config('LemonldapPortal');
 $PORTAL=$_portal  if $_portal;
 ####################################################
-print STDERR "$NOM: Phase : handler AUTHORIZATION VARIABLES
+print STDERR "$ID_HANDLER: Phase : handler AUTHORIZATION VARIABLES
 COOKIE   => $COOKIE
 BASEPUB  => $BASEPUB
 BASEPRIV => $BASEPRIV
@@ -239,7 +260,7 @@ PORTAL   => $PORTAL\n" if $DEBUG ;
 my $xmlsession= $CONF->findParagraph('session',$CACHE);
 $SERVERS = $CONF->formateLineHash ($xmlsession->{SessionParams});
 
-print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if $DEBUG ; 
+print STDERR "$ID_HANDLER: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if $DEBUG ; 
 }
 #
 #
@@ -249,33 +270,35 @@ print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if 
 	my %entete =$r->headers_in();
 	my $idx =$entete{'Cookie'} ;
 	# Load id value from cookie
-	$idx =~ /$COOKIE=([^; ]+)(;?)/o;
+#	$idx =~ /$COOKIE=([^; ]+)(;?)/o; 
+# I remove the o option : o parse one time the regexp.
+	$idx =~ /$COOKIE=([^; ]+)(;?)/;
 	my $id =$1;
   #     $id='675314908c539c2c775072227c7b5d69';
   #      $id='c167b67d628deb1dcfe09de7aa7f927e';
 	unless ($id) {
 		# No cookie found: redirect to portal
-		print STDERR "$NOM : No cookie found for ".$r->uri."\n" if $DEBUG;
+		print STDERR "$ID_HANDLER : No cookie found for ".$r->uri."\n" if $DEBUG;
 		return goPortal($r,'c');
 	}
-	print STDERR "$NOM: id session : $id<--->$idx\n" if $DEBUG;
+	print STDERR "$ID_HANDLER: id session : $id<--->$idx\n" if $DEBUG;
 	# SESSIONS CACHE 
 
 #cache  level 1 test 
 	my $ligne_h;
  unless ($id eq $CLIENT) {
             # Level 2 test by IPC 
-      print STDERR "$NOM: No match in cache level 1 for $id\n" if $DEBUG;
+      print STDERR "$ID_HANDLER: No match in cache level 1 for $id\n" if $DEBUG;
               if ($IPCNB)  {  ####  We want use IPC                 
-                       print STDERR "$NOM :  search in cache level 2 for $id\n" if $DEBUG;
+                       print STDERR "$ID_HANDLER :  search in cache level 2 for $id\n" if $DEBUG;
                 tie %STACK ,'IPC::Shareable' , $KEYIPC, 
                             {create => 1 , mode => 0666};   
                  $ligne_h = $STACK{$id} ;      
                     if  ($ligne_h) {  ## match in ipc 
-                       print STDERR "$NOM :  match in cache level 2 for $id\n" if $DEBUG;
+                       print STDERR "$ID_HANDLER :  match in cache level 2 for $id\n" if $DEBUG;
                             expire_session($id) ;# put on the top of stack    
                                    } else  { 
-      print STDERR "$NOM: No match in cache level 2 for $id\n" if $DEBUG;
+      print STDERR "$ID_HANDLER: No match in cache level 2 for $id\n" if $DEBUG;
 }
 
 
@@ -283,7 +306,7 @@ print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if 
 	                   }  ####  We want use IPC 
 
             unless ($ligne_h) { # no match in cache level 1 and 2 
-		print STDERR "$NOM :  Search  in cache level 3 for $id\n" if $DEBUG;
+		print STDERR "$ID_HANDLER :  Search  in cache level 3 for $id\n" if $DEBUG;
 ###### 
 ######
 ######   search in backend cache 
@@ -294,12 +317,12 @@ print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if 
                          ##  tree causes : Too many connection are served.              
                          ##                the server of session was restarted                
                          ##                It's time out                 
-           print STDERR "$NOM: ERROR OF LOCKING  ON :$id\n"  if $DEBUG; 
+           print STDERR "$ID_HANDLER: ERROR OF LOCKING  ON :$id\n"  if $DEBUG; 
 # I say it's time out 
 	return goPortal($r,'t');
                        }
 #here  we are retrieve session        
-           print STDERR "$NOM: SESSION FIND FOR:$id\n"  if $DEBUG; 
+           print STDERR "$ID_HANDLER: SESSION FIND FOR:$id\n"  if $DEBUG; 
 #now we will look at authorization  and build an header and stock it for the next access
 #FIRST : authorization 
 my $uid = $session{uid};
@@ -326,11 +349,11 @@ my $complement;
                                    } 
 ### end of control                                      
      if ($etat) { 
-	 print STDERR "$NOM: controle: $dn $uri :ACCEPTED \n" if $DEBUG;
+	 print STDERR "$ID_HANDLER: controle: $dn $uri :ACCEPTED \n" if $DEBUG;
       }   else {
 #	  save_session ($id,'BIDON')  ;
-#print STDERR "$NOM: $id saving in cache level 2\n" if $DEBUG;
-         print STDERR "$NOM: controle: $dn $uri :DENIED \n" if $DEBUG;
+#print STDERR "$ID_HANDLER: $id saving in cache level 2\n" if $DEBUG;
+         print STDERR "$ID_HANDLER: controle: $dn $uri :DENIED \n" if $DEBUG;
       }
 
 untie %session;
@@ -357,7 +380,7 @@ $ligne_h.=":$complement";
 #cache  level 1 test 
 # unless($id eq $CLIENT)
       $ligne_h=$CACHE1_ENTETE; 
-      print STDERR "$NOM: match in cache level 1 for $id\n" if $DEBUG;
+      print STDERR "$ID_HANDLER: match in cache level 1 for $id\n" if $DEBUG;
 
   }
 
@@ -372,16 +395,16 @@ $ligne_h.=":$complement";
 #
 $CLIENT=$id;
 $CACHE1_ENTETE=$ligne_h; 
-print STDERR "$NOM: $id saving in cache level 1\n" if $DEBUG;
+print STDERR "$ID_HANDLER: $id saving in cache level 1\n" if $DEBUG;
 
       if (($IPCNB) && (defined (%STACK))) { #we want cache IPC level 2
 	  save_session ($id,$ligne_h)  ;
-print STDERR "$NOM: $id saving in cache level 2\n" if $DEBUG;
+print STDERR "$ID_HANDLER: $id saving in cache level 2\n" if $DEBUG;
           untie %STACK ;
       }
 my $hcode =encode_base64($ligne_h,''); 
-print STDERR "$NOM: header before encoding: $ligne_h\n" if ($DEBUG);
-print STDERR "$NOM: header after encoding: $hcode\n" if $DEBUG;
+print STDERR "$ID_HANDLER: header before encoding: $ligne_h\n" if ($DEBUG);
+print STDERR "$ID_HANDLER: header after encoding: $hcode\n" if $DEBUG;
 ###############  We can insert the header #####################
 my $entete_spec = "Basic ";
 $entete_spec.=$hcode."\n";
@@ -392,10 +415,10 @@ $r->header_in('Authorization'=> $entete_spec);
         if($STOPCOOKIE) {
 	    $r->headers_in->do(sub {
 		(my $cle ,my $valeur) = @_;
-		if ($valeur=~ /$COOKIE/o) {
-		    my $tmp =~ /$COOKIE=.+b/o;
+		if ($valeur=~ /$COOKIE/) {
+		    my $tmp =~ /$COOKIE=.+b/;
 		    $_[1]=~ s/$tmp//;
-		    print STDERR "$NOM: STOPCOOKIE done\n" if ($DEBUG);
+		    print STDERR "$ID_HANDLER: STOPCOOKIE done\n" if ($DEBUG);
 		}
 		1;
 	    });
@@ -411,8 +434,6 @@ $r->header_in('Authorization'=> $entete_spec);
 # end of handler#
 #################
 }
-
-
             
 sub proxy_handler {
     my $r = shift;
@@ -428,7 +449,7 @@ sub proxy_handler {
 #    $uuu=~ s/handler/ressource/;
 #################################
     $url = $BASEPRIV.$uuu;
- print STDERR "$NOM: URLPRIV ACTIVED: $url  
+ print STDERR "$ID_HANDLER: URLPRIV ACTIVED: $url  
                      URLPUB REQUESTED : $url_init\n" if ($DEBUG);       
     my $request = HTTP::Request->new($r->method, $url);
     $r->headers_in->do(sub {
@@ -444,9 +465,9 @@ sub proxy_handler {
 	$request->content_type($r->content_type);
     }
 
-    print STDERR  "$NOM: request ".$request->as_string()."\n" if($DEBUG);
+    print STDERR  "$ID_HANDLER: request ".$request->as_string()."\n" if($DEBUG);
    if ($RECURSIF) { 
-       print STDERR  "$NOM: RECURSIF LWP DESACTIVED\n" if ($DEBUG);
+       print STDERR  "$ID_HANDLER: RECURSIF LWP DESACTIVED\n" if ($DEBUG);
     my @tt= ('HEAD');
     $UA->requests_redirectable(\@tt);
 }
@@ -454,7 +475,7 @@ sub proxy_handler {
         # LWP proxy
 # I 'll forward  on an  external proxy 
 if ($PROXYEXT) {
-print STDERR  "$NOM:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
+print STDERR  "$ID_HANDLER:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
 
     $UA->proxy(http  => $PROXYEXT);
 } 
@@ -476,7 +497,7 @@ print STDERR  "$NOM:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
     $r->content_type('text/html') unless $$content;
     $r->send_http_header;
     $r->print($$content || $response->error_as_HTML);
-    print STDERR "$NOM: response sent\n"  if ($DEBUG);
+    print STDERR "$ID_HANDLER: response sent\n"  if ($DEBUG);
     return OK;
 
 
@@ -490,7 +511,7 @@ sub goPortal {
         $urlc_init.="?".$r->args if $r->args; 
     my  $urlc_initenc = encode_base64($urlc_init,"");
        	$r->header_out(location =>$PORTAL."?op=$op&url=$urlc_initenc");
-	print STDERR "$NOM : Redirect to portal (url was ".$urlc_init.")\n" if($DEBUG);
+	print STDERR "$ID_HANDLER : Redirect to portal (url was ".$urlc_init.")\n" if($DEBUG);
 	return REDIRECT;
         exit;
 }
@@ -553,7 +574,7 @@ sub parseConfig {
     $BASEPRIV=$tmp->{BasePriv};
     $STOPCOOKIE= $tmp->{StopCookie};
     $PROXYEXT = $tmp->{ProxyExt};
-    $RECURSIF= $tmp->{Recusive};
+    $RECURSIF= $tmp->{Recursive};
         }
 1;
 __END__

@@ -6,4 +6,8 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.02  Mer Feb 16 2005
         - correct bug
         - modification of sereval parameters with xml model 
-        - modifications in pod documentation 
+        - modifications in pod documentation
+0.03  Thu Mar 10 2005
+        - correct big bug in id_handlers config  namage
+        - correct syntax in option
+        - correct display for debug  
