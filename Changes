@@ -17,3 +17,12 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - undef cache level 1 for different naming context  
 0.06  Tue Mar 15 2005
         - modify header "Location" of response application 
+0.07  Wed  Mar 30 2005
+        - modify header  Connection / host with LWP built-in proxy
+        - correct bug :Case fault on base public parameter name in XML config	
+        - correct bug : invalid call to parseconfig 
+        - Handler  Generic4a2.pm  for Apache2
+        - correct Basepub to BasePub in parseConfig
+
+
+

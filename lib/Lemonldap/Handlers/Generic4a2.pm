@@ -1,4 +1,4 @@
-package Lemonldap::Handlers::Generic;
+package Lemonldap::Handlers::Generic4a2;
 use strict;
 use warnings;
 #####  use ######
@@ -153,7 +153,7 @@ if ($ID_HANDLER) {
 	$COOKIE = $GENERAL->{Cookie};
         $PORTAL=$GENERAL->{Portal};
         $CACHE =$GENERAL->{Session} ;
-       parseConfig($tmpconf);
+        parseConfig($tmpconf);
     		}  else 		{ 
 	$tmpconf= $CONF->{$ID_HANDLER} ;
         parseConfig($tmpconf); 
@@ -268,8 +268,9 @@ print STDERR "$ID_HANDLER: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS 
 
 	# AUTHENTICATION
 	# cookie search
+	my $entete2 =$r->headers_in();
 	my %entete =$r->headers_in();
-	my $idx =$entete{'Cookie'} ;
+	my $idx =$entete2->{'Cookie'} ;
 	# Load id value from cookie
 #	$idx =~ /$COOKIE=([^; ]+)(;?)/o; 
 # I remove the o option : o parse one time the regexp.
@@ -350,10 +351,8 @@ my $complement;
 #### begin:  here for he compatibility  with older lemonldap
             $complement=~  s/#.*//;
 ###  end  :  here for he compatibility  with older lemonldap
-
-
-
-                                     } 
+         
+                          } 
 ### end of control                                      
      if ($etat) { 
 	 print STDERR "$ID_HANDLER: controle: $dn $uri :ACCEPTED \n" if $DEBUG;
@@ -482,7 +481,6 @@ if ($request->header('Host')){
 if ($request->header('Connection')){
       $request->header('Connection' => 'close');
 }
-
     print STDERR  "$ID_HANDLER: request ".$request->as_string()."\n" if($DEBUG);
    if ($RECURSIF) { 
        print STDERR  "$ID_HANDLER: RECURSIF LWP DESACTIVED\n" if ($DEBUG);
@@ -498,9 +496,10 @@ print STDERR  "$ID_HANDLER:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
     $UA->proxy(http  => $PROXYEXT);
 } 
     my $response = $UA->request($request);
+    my $type =$response->header('Content-type');
 ### begin: somes bad requests have bad header . 
     my $content = $response->header('Content-type');
-     $content=~ s/,/;/g ;
+    $content=~ s/,/;/g ;
 ### end: somes bad requests have bad header . 
     $r->content_type($content);
 ### begin: I correct on the fly some incomming header like mod_proxy does
@@ -510,12 +509,18 @@ if ($response->header('Location')) {
 $response->header('Location' => $h);
 }
 ### end: I correct on the fly some incomming header like mod_proxy does
-
-    $r->status($response->code);
+     $r->status($response->code);
     $r->status_line(join " ", $response->code, $response->message);
     $response->scan(sub {
 	$r->headers_out->add(@_);
     });
+if ($r->header_out('Location')) {
+  my $h =$r->header_out('Location');
+   $h=~ s/$BASEPRIV/$BASEPUB/ ;
+$r->header_out('Location' => $h);
+}
+
+
 
     if ($r->header_only) {
 	$r->send_http_header();
@@ -539,7 +544,8 @@ sub goPortal {
         my $urlc_init = $BASEPUB.$r->uri;
         $urlc_init.="?".$r->args if $r->args; 
     my  $urlc_initenc = encode_base64($urlc_init,"");
-       	$r->header_out(location =>$PORTAL."?op=$op&url=$urlc_initenc");
+        print STDERR "GERMANEX $urlc_init\n" ;    
+   	$r->header_out(location =>$PORTAL."?op=$op&url=$urlc_initenc");
 	print STDERR "$ID_HANDLER : Redirect to portal (url was ".$urlc_init.")\n" if($DEBUG);
 	return REDIRECT;
         exit;
@@ -611,18 +617,30 @@ __END__
 
 =head1 NAME
 
-Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
-
-Lemonldap::Handlers::Generic4a2  - Handler for Apache2 Lemonldap SSO system 
+Lemonldap::Handlers::Generic4a2 - Handler Apache2 for  Lemonldap sso system
 
 =head1 SYNOPSIS
 
 In httpd.conf 
 
-<location mylocation>  
- Lemonldap::Handlers::Generic;
- 
-</location>
+ <VirtualHost *:80>
+ PerlSetVar LemonldapEnabledproxy 1
+ ServerName serverpub.foo.bar:80
+ DocumentRoot /usr/local/apache2/htdocs
+ PerlInitHandler Lemonldap::Handlers::Generic4a2
+ #ProxyPass / http://serverpriv.foo.bar/
+ #ProxyPassReverse / http://serverpriv.foo.bar/
+ PerlSetVar LemonldapConfig /usr/local/apache2/conf/application_new.xml
+ PerlSetVar LemonldapConfigIpcKey CONF
+ PerlSetVar LemonldapDEBUG 1
+ PerlSetVar LemonldapDomain foo.bar
+ PerlSetVar LemonldapHandlerID handler2
+ PerlSetVar LemonldapBasePub http://serverpub.foo.bar
+ PerlSetVar LemonldapBasePriv http://serverpriv.foo.bar
+ PerlSetVar LemonldapCodeAppli APPLI
+ PerlSetVar LemonldapAttrLdap profilapplicatif
+ </virtualhost>
+
 
 =head1 DESCRIPTION
 
@@ -740,6 +758,9 @@ MacEachern - O'REILLY
 
 =item Xavier Guimard, E<lt>x.guimard@free.frE<gt>
 
+=item  Portage under Apache2 is made with help of : Ali Pouya and Shervin
+     Ahmadi (MINEFI/DGI)
+     
 =back
 
 =head1 COPYRIGHT AND LICENSE
@@ -760,8 +781,6 @@ under the terms of the GNU General Public License version 2.
 =item Portions are copyrighted by Doug MacEachern and Lincoln Stein.
 This library is under the GNU General Public License, Version 2.
 
-=item Portage under Apache2 is made with help of : Ali Pouya and 
-Shervin Ahmadi (MINEFI/DGI) 
 
 =back
 

@@ -1,7 +1,8 @@
-Lemonldap/Handlers/Generic version 0.06
-=======================================
 NAME
     Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
+
+    Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
+    system
 
 SYNOPSIS
     In httpd.conf
@@ -87,18 +88,6 @@ DESCRIPTION
    LemonldapPortal
      The url of login page 
 
-
-INSTALLATION
-
-To install this module type the following:
-
-   perl Makefile.PL
-   make
-   make test
-   make install
-
-
-
 SEE ALSO
     Lemonldap(3), Lemonldap::Portal::Standard
 
@@ -121,6 +110,9 @@ COPYRIGHT AND LICENSE
     Portions are copyrighted under the same license as Perl itself.
     Portions are copyrighted by Doug MacEachern and Lincoln Stein. This
     library is under the GNU General Public License, Version 2.
+    Portage under Apache2 is made with help of : Ali Pouya and Shervin
+    Ahmadi (MINEFI/DGI)
+
       This program is free software; you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation; version 2 dated June, 1991.
@@ -133,5 +125,4 @@ COPYRIGHT AND LICENSE
       A copy of the GNU General Public License is available in the source tree;
       if not, write to the Free Software Foundation, Inc.,
       59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
 

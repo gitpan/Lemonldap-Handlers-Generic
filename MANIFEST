@@ -3,6 +3,7 @@ eg/accueil.pl
 eg/application_new.xml
 eg/httpd.conf.examples
 Generic.pm
+lib/Lemonldap/Handlers/Generic4a2.pm
 Makefile.PL
 MANIFEST
 META.yml			Module meta-data (added by MakeMaker)
