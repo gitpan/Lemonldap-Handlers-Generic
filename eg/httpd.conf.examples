@@ -1,0 +1,31 @@
+Alias /portail/ "/opt/apache/portail/"
+perlmodule Lemonldap::Handlers::Generic
+<Location /portail >
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    AllowOverride None
+    Options +ExecCGI
+</Location>
+<virtualhost 10.ip.ip.99>
+ServerName edito-agents.int.foo.bar
+ProxyPass /  http://edito-agents.int.foo.bar:8080
+ProxyPassReverse /  http://edito-agents.int.foo.bar:8080  
+ProxyRemote http http://10.ip.ip.ip:3132
+perltranshandler Lemonldap::Handlers::Generic
+PerlSetVar LemonldapDomain int.foo.bar
+PerlSetVar LemonldapConfig /opt/apache/conf/application_new.xml
+PerlSetVar LemonldapConfigIpcKey  CONF
+PerlSetVar LemonldapConfigTtl 1000
+PerlSetVar LemonldapHandlerID edito-agent
+PerlSetVar LemonldapIpcNb  5
+PerlSetVar LemonldapIpcKey EDA1
+perlSetVar LemonldapDebug 1
+perlSetVar LemonldapEnabledProxy 0
+perlSetVar LemonldapAttrLdap dgi
+perlSetVar LemonldapCodeAppli EDA
+perlSetVar LemonldapPortal http://authen.int.foo.bar/portail/accueil.pl
+perlSetVar LemonldapProxyExt 'http://10.ip.ip.ip:3132'
+PerlSetVar LemonldapBasePriv http://edito-agents.int.foo.bar:8080
+PerlSetVar LemonldapBasePub http://edito-agents.int.foo.bar
+</virtualhost>
+

@@ -17,7 +17,12 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.01';
+$VERSION = '0.02';
+our $VERSION_LEMONLDAP="1.0" ;
+our $VERSION_INTERNAL="0.02-3" ;
+
+####
+####
 #### my declaration #########
 our $UA;
 our $DEBUG;
@@ -32,6 +37,7 @@ our $ATTRLDAP;
 our $COOKIE;
 our $PORTAL;
 our $BASEPUB;
+our $GLUE;
 our $BASEPRIV;
 our $SERVERS;
 our $CACHE;
@@ -69,12 +75,14 @@ print STDERR "$NOM: Phase : handler initialization one step beyond\n" if $DEBUG 
 }
 unless ($LDAPCONTROL) {
 
-$DEBUG = $r->dir_config('LemonldapLogDEBUG')  ;
+$DEBUG = $r->dir_config('LemonldapDEBUG')  ;
 print STDERR "$NOM: Phase : handler initialization DEBUG => $DEBUG\n" if $DEBUG ; 
 print STDERR "$NOM: Phase : handler initialization LOAD XML file from  httpd.conf\n" if $DEBUG ; 
 ### I will try  retieve XML  from  httpd conf 
-$FILE = $r->dir_config('LemonldapXML');
-print STDERR "$NOM: Phase : handler initialization LOAD XML file $FILE from  httpd.conf\n" if $DEBUG ; 
+$FILE = $r->dir_config('LemonldapConfig');
+$GLUE = $r->dir_config('LemonldapConfigIpcKey');
+
+print STDERR "$NOM: Phase : handler initialization LOAD XML file $FILE and $GLUE from  httpd.conf\n" if $DEBUG ; 
 
 ### retrieve domain xml 
 print STDERR "$NOM: Phase : handler initialization LOAD DOMAIN  httpd.conf\n" if $DEBUG ; 
@@ -101,7 +109,7 @@ print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:fa
 print STDERR "$NOM: Phase : handler initialization try to load XML conf\n" if $DEBUG ; 
 $CONF= Lemonldap::Config::Parameters->new (
                                                 file => $FILE ,
-					      cache => 'CONF' );
+					      cache => $GLUE );
 	if ($CONF) {
 print STDERR "$NOM: Phase : handler initialization LOAD XML conf :succeded \n" if $DEBUG ; 
 } else {
@@ -116,12 +124,13 @@ print STDERR "$NOM: Phase : handler initialization LOAD XML conf\n" if $DEBUG ;
 
 if ($ID_HANDLER) {
     my $tmpconf;
+ print STDERR "domain $DOMAIN\n";
     if ($DOMAIN) {  
     	$GENERAL = $CONF->getDomain($DOMAIN) ;
 	my $tmpconf = $GENERAL->{$ID_HANDLER}; 
-	$COOKIE = $GENERAL->{cookie};
-        $PORTAL=$GENERAL->{login};
-        $CACHE =$GENERAL->{cache} ;
+	$COOKIE = $GENERAL->{Cookie};
+        $PORTAL=$GENERAL->{Portal};
+        $CACHE =$GENERAL->{Session} ;
         parseConfig($tmpconf);
     		}  else 		{ 
 	$tmpconf= $CONF->{$ID_HANDLER} ;
@@ -141,13 +150,13 @@ unless ($LDAPCONTROL) {
 my $_proxy = $r->dir_config('LemonldapEnabledproxy');
 $PROXY= $_proxy if $_proxy;
 ####################################################
-my $_keyIPC= $r->dir_config('LemonldapIPCKey');
+my $_keyIPC= $r->dir_config('LemonldapIpcKey');
 $KEYIPC= $_keyIPC if $_keyIPC;
 ####################################################
-my $_IPCNB= $r->dir_config('LemonldapIPCNB');
+my $_IPCNB= $r->dir_config('LemonldapIpcNb');
 $IPCNB= $_IPCNB if $_IPCNB;
 ####################################################
-my $_attrldap= $r->dir_config('LemonldapAttrLDAP');
+my $_attrldap= $r->dir_config('LemonldapAttrLdap');
 $ATTRLDAP= $_attrldap if $_attrldap;
 ####################################################
 my $_ldapcontrol= $r->dir_config('LemonldapCodeAppli');
@@ -156,17 +165,17 @@ $LDAPCONTROL=$_ldapcontrol  if $_ldapcontrol;
 my $_disabledcontrol= $r->dir_config('LemonldapDisabled');
 $DISABLEDCONTROL=$_disabledcontrol  if $_disabledcontrol;
 ####################################################
-my $_cache= $r->dir_config('LemonldapCache');
+my $_cache= $r->dir_config('LemonldapSession');
 $CACHE=$_cache  if $_cache;
 ####################################################
 my $_stop= $r->dir_config('LemonldapStopCookie');
 $STOPCOOKIE=$_stop  if $_stop;
 ####################################################
-my $_mode= $r->dir_config('LemonldapRecursif');
+my $_mode= $r->dir_config('LemonldapRecursive');
 $RECURSIF=$_mode  if $_mode;
 ####################################################
 my $_proxyext= $r->dir_config('LemonldapProxyExt');
-$PROXYEXT=$_mode  if $_proxyext;
+$PROXYEXT=$_proxyext  if $_proxyext;
 ####################################################
 
 #
@@ -181,8 +190,8 @@ ATTRLDAP        => $ATTRLDAP
 LDAPCONTROL     => $LDAPCONTROL
 DISABLEDCONTROL => $DISABLEDCONTROL
 RECURSIF        => $RECURSIF
+PROXYEXT        => $PROXYEXT 
 STOPCOOKIE      => $STOPCOOKIE\n" if $DEBUG ; 
-
 }
 ##### end of initialization 
 ## deleted those line  
@@ -202,7 +211,7 @@ $UA->agent(join "/", __PACKAGE__, $VERSION);
 #	return DECLINED unless ($PROXY);
 # is this area protected
 # configuration check
-unless ($COOKIE) {
+#unless ($COOKIE) {
 ####################################################
 my $_cookie = $r->dir_config('LemonldapCookie');
 $COOKIE= $_cookie if $_cookie;
@@ -222,17 +231,15 @@ BASEPUB  => $BASEPUB
 BASEPRIV => $BASEPRIV
 PORTAL   => $PORTAL\n" if $DEBUG ; 
 
-}
+#}
 #### Read cache info from  XML config 
 # 
 #
 	unless ($SERVERS) {
 my $xmlsession= $CONF->findParagraph('session',$CACHE);
-#my $ligne= Dumper ($xmlsession) ;
-#print STDERR "ligne : $ligne\n";
-my $refserversession =$xmlsession->{memcached}->{servers} ;
-$SERVERS = eval $refserversession;
-print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG:servers=>$refserversession \n" if $DEBUG ; 
+$SERVERS = $CONF->formateLineHash ($xmlsession->{SessionParams});
+
+print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS \n" if $DEBUG ; 
 }
 #
 #
@@ -282,10 +289,7 @@ print STDERR "$NOM: Phase : handler AUTHORIZATION CACHE CONFIG:servers=>$refserv
 ######   search in backend cache 
 ######
 		my %session ;
-   tie %session, 'Apache::Session::Memorycached', $id,
-      {
-         servers        => $SERVERS,
-      };
+   tie %session, 'Apache::Session::Memorycached', $id,$SERVERS;
  unless ($session{dn}) {  ##  the cookie is present but i can't  retrieve session
                          ##  tree causes : Too many connection are served.              
                          ##                the server of session was restarted                
@@ -343,7 +347,7 @@ untie %session;
 ############################################
 $ligne_h = $dn;
 if ($complement) {
-$ligne_h.="$complement";
+$ligne_h.=":$complement";
 } 
 	    } ### end of search in cache 1 ,2 and 3
 
@@ -369,7 +373,8 @@ $ligne_h.="$complement";
 $CLIENT=$id;
 $CACHE1_ENTETE=$ligne_h; 
 print STDERR "$NOM: $id saving in cache level 1\n" if $DEBUG;
-      if (($IPCNB) && (%STACK)) { #we want cache IPC level 2
+
+      if (($IPCNB) && (defined (%STACK))) { #we want cache IPC level 2
 	  save_session ($id,$ligne_h)  ;
 print STDERR "$NOM: $id saving in cache level 2\n" if $DEBUG;
           untie %STACK ;
@@ -399,8 +404,8 @@ $r->header_in('Authorization'=> $entete_spec);
 
 
 ############################ 
-
-	return OK ;
+ return OK if $PROXY ;
+ return DECLINED unless $PROXY;      
 ############################
 #################
 # end of handler#
@@ -419,8 +424,10 @@ sub proxy_handler {
     my %entete = $r->headers_in();
     my $url_init= $BASEPUB.$url;
     my $uuu = $url;
-    $uuu=~ s/handler/ressource/; 
-   $url = $BASEPRIV.$uuu;
+### only for test################
+#    $uuu=~ s/handler/ressource/;
+#################################
+    $url = $BASEPRIV.$uuu;
  print STDERR "$NOM: URLPRIV ACTIVED: $url  
                      URLPUB REQUESTED : $url_init\n" if ($DEBUG);       
     my $request = HTTP::Request->new($r->method, $url);
@@ -447,6 +454,8 @@ sub proxy_handler {
         # LWP proxy
 # I 'll forward  on an  external proxy 
 if ($PROXYEXT) {
+print STDERR  "$NOM:OUTPUT PROXY:$PROXYEXT\n" if ($DEBUG);
+
     $UA->proxy(http  => $PROXYEXT);
 } 
     my $response = $UA->request($request);
@@ -535,16 +544,16 @@ tied(%STACK)->shunlock ;
 sub parseConfig {
     my $tmp =shift;
     $PROXY= $tmp->{Enabledproxy};
-    $KEYIPC=$tmp->{IPCKey};
-    $IPCNB= $tmp->{IPCNB};
-    $ATTRLDAP= $tmp->{AttrLDAP};
+    $KEYIPC=$tmp->{IpcKey};
+    $IPCNB= $tmp->{IpcNb};
+    $ATTRLDAP= $tmp->{AttrLdap};
     $LDAPCONTROL=$tmp->{CodeAppli};
     $DISABLEDCONTROL=$tmp->{Disabled};
     $BASEPUB=$tmp->{Basepub};
     $BASEPRIV=$tmp->{BasePriv};
     $STOPCOOKIE= $tmp->{StopCookie};
     $PROXYEXT = $tmp->{ProxyExt};
-    $RECURSIF= $tmp->{Recusif};
+    $RECURSIF= $tmp->{Recusive};
         }
 1;
 __END__
@@ -561,104 +570,108 @@ In httpd.conf
 <location mylocation>  
  Lemonldap::Handlers::Generic;
  
-</locaction>
+</location>
 
 =head1 DESCRIPTION
 
 
 =head2 Parameters
 
-=head3 LemonldapXML "/foo/bar/file_config.xml"
+=head4 LemonldapConfig "/foo/bar/file_config.xml"
 
-The filename of the mean XML Config   :It's REQUIRED 
+ The filename of the mean XML Config   :It's REQUIRED 
  
-=head3 LemonldapDomain foo.bar
+=head4 LemonldapConfigIpcKey GLUE
 
-If present , it fixes the value of domain for the  application protected by  this handler (see below) 
+ The identifier of config segment IPC  :It's REQUIRED 
 
-=head3  LemonldapHandlerId  <xml section>
+=head4 LemonldapDomain foo.bar
 
-If present the configuration of handler is read from XML config backend.
+ If present , it fixes the value of domain for the  application protected by  this handler (see below) 
+
+=head4  LemonldapHandlerId  <xml section>
+
+ If present the configuration of handler is read from XML config backend.
 You can overlay XML config backend with httpd.conf 
 
 
-=head3  LemonldapEnabledproxy  0|1
+=head4  LemonldapEnabledproxy  0|1
 
-0 : don't use built-in proxy (configuration  must use with mod_proxy or mod_rewrite )
-1 : use built-in proxy
-default : 0 
+ 0 : don't use built-in proxy (configuration  must use with mod_proxy or mod_rewrite )
+ 1 : use built-in proxy
+ default : 0 
 
-=head3  LemonldapLogDEBUG  0|1
+=head4  LemonldapDEBUG  0|1
 
-0 : mode debug disabled
-1 : mode debug enabled
-default : 0 
+ 0 : mode debug disabled
+ 1 : mode debug enabled
+ default : 0 
 
 
-=head3  LemonldapIPCNB     0..nn 
+=head4  LemonldapIpcNb     0..nn 
 
-IPNB is the number of session which you want to keep in cache evel 2 (IPC) 
+ IPNB is the number of session which you want to keep in cache evel 2 (IPC) 
 
-min value : 0  (don't use cache IPC level2) 
-max value : ???  : It depends of your server 
-recommended : 100
-The youngest value replace the oldest .
+ min value : 0  (don't use cache IPC level2) 
+ max value : ???  : It depends of your server 
+ recommended : 100
+ The youngest value replace the oldest .
 
-=head3  LemonldapIPCKey   '4 carac'
+=head4  LemonldapIpcKey   '4 carac'
 
-A string of 4 caracteres (see IPC::Shareable doc) 
+ A string of 4 caracteres (see IPC::Shareable doc) 
  It must be 'unique'  . 
 
-=head3  LemonldapAttrLDAP  'string'
+=head4  LemonldapAttrLdap  'string'
 
-The first level of hash session  , whi can to be the name of LDAP attribute
-see below
+ The first level of hash session  , whi can to be the name of LDAP attribute
+ see below
 
-=head3 LemonldapCodeAppli 'string'
+=head4 LemonldapCodeAppli 'string'
 
-The second  level of hash session  , whi can to be the code of application
-The access of %session if $session{LemonldapAttrLDAP}{lemonldapCodeAppli} 
+ The second  level of hash session  , whi can to be the code of application
+ The access of %session if $session{LemonldapAttrLDAP}{lemonldapCodeAppli} 
  with the value of key = profil .
  
-=head3 LemonldapDisabled  0|1
+=head4 LemonldapDisabled  0|1
 
-0 : Control the request (default)
-1 : Don't control the request (useful for jpeg ) 
+ 0 : Control the request (default)
+ 1 : Don't control the request (useful for jpeg ) 
 
-=head3 LemonldapSTOPCOOKIE  0|1
+=head4 LemonldapStopCookie  0|1
 
-0 : Let pass the lemonldap cookie to application (default).
-1 : Block the lemonldap cookie. 
+ 0 : Let pass the lemonldap cookie to application (default).
+ 1 : Block the lemonldap cookie. 
 
-=head3 LemonldapRECURSIF  0|1
+=head4 LemonldapRECURSIVE  0|1
 
-0 : Let LWP chases redirection (default).
-1 : Let Client chases redirection instead LWP. 
+ 0 : Let LWP chases redirection (default).
+ 1 : Let Client chases redirection instead LWP. 
 
-=head3 LemonldapProxyExt  0|1
+=head4 LemonldapProxyExt  0|1
 
-0 : Let LWP resquets on ressource (default).
-1 : force LWP to request via an external proxy. 
+ 0 : Let LWP resquets on ressource (default).
+ 1 : force LWP to request via an external proxy. 
 
-=head3 LemonldapCache  'cachelevel 3'
+=head4 LemonldapSession  'cachelevel 3'
 
-It is the name of XML section  which  describes the backend used in order to store  the  session .
+ It is the name of XML section  which  describes the backend used in order to store  the  session .
 
-=head3 LemonldapCookie 'name_of_cookie'
+=head4 LemonldapCookie 'name_of_cookie'
 
  eg: lemontest
  
-=head3 LemonldapBasePub
+=head4 LemonldapBasePub
 
-The public host name  avaiable by user 
+ The public host name  avaiable by user 
 
-=head3 LemonldapBasePriv
+=head4 LemonldapBasePriv
 
-The private host name  not avaiable by user 
+ The private host name  not avaiable by user 
 
-=head3 LemonldapPortal
+=head4 LemonldapPortal
 
-The url of login page 
+ The url of login page 
 
 =head1 SEE ALSO
 

@@ -1,6 +1,5 @@
-Lemonldap/Handlers/Generic version 0.01
+Lemonldap/Handlers/Generic version 0.02
 =======================================
-
 NAME
     Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
 
@@ -9,81 +8,84 @@ SYNOPSIS
 
     <location mylocation> Lemonldap::Handlers::Generic;
 
-    </locaction>
+    </location>
 
 DESCRIPTION
-
   Parameters
-
-   LemonldapXML "/foo/bar/file_config.xml"
-    The filename of the mean XML Config :It's REQUIRED
+   LemonldapConfig "/foo/bar/file_config.xml"
+     The filename of the mean XML Config   :It's REQUIRED 
+ 
+   LemonldapConfigIpcKey GLUE
+     The identifier of config segment IPC  :It's REQUIRED 
 
    LemonldapDomain foo.bar
-    If present , it fixes the value of domain for the application protected
-    by this handler (see below)
+     If present , it fixes the value of domain for the  application protected by  this handler (see below) 
 
    LemonldapHandlerId  <xml section>
-    If present the configuration of handler is read from XML config backend.
-    You can overlay XML config backend with httpd.conf
+     If present the configuration of handler is read from XML config backend.
+    You can overlay XML config backend with httpd.conf 
 
    LemonldapEnabledproxy  0|1
-    0 : don't use built-in proxy (configuration must use with mod_proxy or
-    mod_rewrite ) 1 : use built-in proxy default : 0
+     0 : don't use built-in proxy (configuration  must use with mod_proxy or mod_rewrite )
+     1 : use built-in proxy
+     default : 0 
 
-   LemonldapLogDEBUG  0|1
-    0 : mode debug disabled 1 : mode debug enabled default : 0
+   LemonldapDEBUG  0|1
+     0 : mode debug disabled
+     1 : mode debug enabled
+     default : 0 
 
-   LemonldapIPCNB     0..nn
-    IPNB is the number of session which you want to keep in cache evel 2
-    (IPC)
+   LemonldapIpcNb     0..nn
+     IPNB is the number of session which you want to keep in cache evel 2 (IPC) 
 
-    min value : 0 (don't use cache IPC level2) max value : ??? : It depends
-    of your server recommended : 100 The youngest value replace the oldest .
+     min value : 0  (don't use cache IPC level2) 
+     max value : ???  : It depends of your server 
+     recommended : 100
+     The youngest value replace the oldest .
 
-   LemonldapIPCKey   '4 carac'
-    A string of 4 caracteres (see IPC::Shareable doc) It must be 'unique' .
+   LemonldapIpcKey   '4 carac'
+     A string of 4 caracteres (see IPC::Shareable doc) 
+     It must be 'unique'  . 
 
-   LemonldapAttrLDAP  'string'
-    The first level of hash session , whi can to be the name of LDAP
-    attribute see below
+   LemonldapAttrLdap  'string'
+     The first level of hash session  , whi can to be the name of LDAP attribute
+     see below
 
    LemonldapCodeAppli 'string'
-    The second level of hash session , whi can to be the code of application
-    The access of %session if
-    $session{LemonldapAttrLDAP}{lemonldapCodeAppli} with the value of key =
-    profil .
-
+     The second  level of hash session  , whi can to be the code of application
+     The access of %session if $session{LemonldapAttrLDAP}{lemonldapCodeAppli} 
+     with the value of key = profil .
+ 
    LemonldapDisabled  0|1
-    0 : Control the request (default) 1 : Don't control the request (useful
-    for jpeg )
+     0 : Control the request (default)
+     1 : Don't control the request (useful for jpeg ) 
 
-   LemonldapSTOPCOOKIE  0|1
-    0 : Let pass the lemonldap cookie to application (default). 1 : Block
-    the lemonldap cookie.
+   LemonldapStopCookie  0|1
+     0 : Let pass the lemonldap cookie to application (default).
+     1 : Block the lemonldap cookie. 
 
-   LemonldapRECURSIF  0|1
-    0 : Let LWP chases redirection (default). 1 : Let Client chases
-    redirection instead LWP.
+   LemonldapRECURSIVE  0|1
+     0 : Let LWP chases redirection (default).
+     1 : Let Client chases redirection instead LWP. 
 
    LemonldapProxyExt  0|1
-    0 : Let LWP resquets on ressource (default). 1 : force LWP to request
-    via an external proxy.
+     0 : Let LWP resquets on ressource (default).
+     1 : force LWP to request via an external proxy. 
 
-   LemonldapCache  'cachelevel 3'
-    It is the name of XML section which describes the backend used in order
-    to store the session .
+   LemonldapSession  'cachelevel 3'
+     It is the name of XML section  which  describes the backend used in order to store  the  session .
 
    LemonldapCookie 'name_of_cookie'
      eg: lemontest
  
    LemonldapBasePub
-    The public host name avaiable by user
+     The public host name  avaiable by user 
 
    LemonldapBasePriv
-    The private host name not avaiable by user
+     The private host name  not avaiable by user 
 
    LemonldapPortal
-    The url of login page
+     The url of login page 
 
 
 INSTALLATION

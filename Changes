@@ -3,4 +3,7 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.01  Fri Feb 11 09:44:13 2005
 	- original version; created by h2xs 1.22 with options
 		-AXn Lemonldap::Handlers::Generic
-
+0.02  Mer Feb 16 2005
+        - correct bug
+        - modification of sereval parameters with xml model 
+        - modifications in pod documentation 

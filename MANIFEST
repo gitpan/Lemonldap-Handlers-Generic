@@ -1,9 +1,10 @@
 Changes
+eg/accueil.pl
+eg/application_new.xml
+eg/httpd.conf.examples
 Generic.pm
 Makefile.PL
 MANIFEST
+META.yml			Module meta-data (added by MakeMaker)
 README
-eg/application_new.xml
-eg/httpd.conf
 t/1.t
-META.yml                                Module meta-data (added by MakeMaker)
