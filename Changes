@@ -23,6 +23,13 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - correct bug : invalid call to parseconfig 
         - Handler  Generic4a2.pm  for Apache2
         - correct Basepub to BasePub in parseConfig
+0.08  Fri  Apr 22 2005
+        - modify header  Connection / host with LWP built-in proxy
+        - correct bug :Case fault on base public parameter name in XML config	
+        - correct bug : invalid call to parseconfig 
+        - add  Multihoming handler and 2 SSL handlers 
+
+
 
 
 

@@ -17,7 +17,7 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.07';
+$VERSION = '0.08';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -343,7 +343,7 @@ my $complement;
 #
 #
 #
-       if  ($session{$ATTRLDAP}{$LDAPCONTROL}) { #the user have the good authorization 
+       if  (exists($session{$ATTRLDAP}{$LDAPCONTROL})) { #the user have the good authorization 
                                                # in order to access at application 
 	   $etat =1 ;# We open tge gate
            $complement =$session{$ATTRLDAP}{$LDAPCONTROL};
@@ -376,7 +376,7 @@ untie %session;
 
 ############################################
 $ligne_h = $dn;
-if ($complement) {
+if (defined($complement)) {
 $ligne_h.=":$complement";
 } 
 	    } ### end of search in cache 1 ,2 and 3

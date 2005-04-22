@@ -3,6 +3,12 @@ NAME
 
     Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
     system
+    
+    Lemonldap::Handlers::GenericSSL - Handler full SSL for Lemonldap sso system
+
+    Lemonldap::Handlers::Generic4a2 - Handler full SSL  Apache2 Lemonldap SSO
+
+    Lemonldap::Handlers::GenericMH1 - Handler with multihoming facilities
 
 SYNOPSIS
     In httpd.conf
@@ -98,9 +104,10 @@ SEE ALSO
 
     Eric German, <germanlinux@yahoo.fr>
     Xavier Guimard, <x.guimard@free.fr>
+    isabelle Serre , <isabelle.serre@justice.gouv.fr>
 
 COPYRIGHT AND LICENSE
-    Copyright (C) 2004 by Eric German & Xavier Guimard
+    Copyright (C) 2004 by Eric German & Xavier Guimard  & Isabelle Serre
 
     Lemonldap originaly written by Eric german who decided to publish him in
     2003 under the terms of the GNU General Public License version 2.
