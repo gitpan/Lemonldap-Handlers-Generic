@@ -17,7 +17,7 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.08';
+$VERSION = '0.09';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -522,7 +522,7 @@ $response->header('Location' => $h);
 	return OK;
     }
 
-    my $content = \$response->content;
+     $content = \$response->content;
     $r->content_type('text/html') unless $$content;
     $r->send_http_header;
     $r->print($$content || $response->error_as_HTML);
@@ -611,9 +611,19 @@ __END__
 
 =head1 NAME
 
-Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
+    Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
 
-Lemonldap::Handlers::Generic4a2  - Handler for Apache2 Lemonldap SSO system 
+    Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
+    system
+    
+    Lemonldap::Handlers::GenericSSL - Handler full SSL for Lemonldap sso system
+
+    Lemonldap::Handlers::Generic4a2 - Handler full SSL  Apache2 Lemonldap SSO
+
+    Lemonldap::Handlers::GenericMH1 - Handler with multihoming facilities
+
+
+
 
 =head1 SYNOPSIS
 
@@ -740,11 +750,13 @@ MacEachern - O'REILLY
 
 =item Xavier Guimard, E<lt>x.guimard@free.frE<gt>
 
+=item Isabelle Serre, E<lt>isabelle.serre@justice.gouv.frE<gt>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004 by Eric German E<amp> Xavier Guimard
+Copyright (C) 2004 by Eric German E<amp> Xavier Guimard E<amp> Isabelle Serre
 
 Lemonldap originaly written by Eric german who decided to publish him in 2003
 under the terms of the GNU General Public License version 2.

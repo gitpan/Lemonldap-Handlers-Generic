@@ -29,6 +29,12 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - correct bug : invalid call to parseconfig 
         - add  Multihoming handler and 2 SSL handlers 
 
+0.09  Mon  Apr 25 2005
+        - Correct warning
+
+
+
+
 
 
 
