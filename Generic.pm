@@ -17,7 +17,7 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.09';
+$VERSION = '0.10';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -560,7 +560,17 @@ if ($tmpvar) {
 my @stack;
 @stack= grep ($id ne $_ ,@tmp);
 unshift @stack, $id;
+
 my $config = \@stack;
+
+#### for avoid stack overflow 
+my %hashs;
+foreach (@stack) {
+$hashs{$_}=1;
+
+}
+
+####
 #my $configsx=Dumper ($config);
 #print STDERR "final = $configsx\n";
   if ($#stack > $IPCNB ) {
@@ -568,6 +578,13 @@ my $config = \@stack;
   print STDERR "sup  $to_delete\n";
   delete $STACK{$to_delete}; 
    }
+#### for avoid stack overflow 
+foreach (keys %STACK)  {
+next if /QUEUE/ ;
+delete $STACK{$_} unless $hashs{$_} ;
+ }
+
+
 #$Data::Dumper::Purity=1;
 #$Data::Dumper::Terse=1;
 my $buffer;

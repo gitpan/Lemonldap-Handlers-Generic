@@ -19,7 +19,7 @@ use Crypt::SSLeay;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.07';
+$VERSION = '0.10';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-1" ;
 #### my declaration #########
@@ -650,6 +650,13 @@ if ($tmpvar) {
 my @stack;
 @stack= grep ($id ne $_ ,@tmp);
 unshift @stack, $id;
+#### for avoid stack overflow 
+my %hashs;
+foreach (@stack) {
+$hashs{$_}=1;
+
+}
+
 my $config = \@stack;
 #my $configsx=Dumper ($config);
 #print STDERR "final = $configsx\n";
@@ -659,6 +666,12 @@ my $config = \@stack;
   delete $STACK{$to_delete}; 
    }
 #$Data::Dumper::Purity=1;
+#### for avoid stack overflow 
+foreach (keys %STACK)  {
+next if /QUEUE/ ;
+delete $STACK{$_} unless $hashs{$_} ;
+ }
+
 #$Data::Dumper::Terse=1;
 my $buffer;
 foreach (@stack){
