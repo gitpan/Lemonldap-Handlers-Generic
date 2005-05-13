@@ -19,7 +19,7 @@ use String::CRC32;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.10';
+$VERSION = '0.11';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.1" ;
 
@@ -588,7 +588,7 @@ sub proxy_handler {
 	my $buf;
 	$r->read($buf, $len);
 	$request->content($buf);
-	$request->content_type($r->content_type);
+	$request->content_type($r->header_in('Content-Type'));
     }
 ###begin: some modification like mod_proxy does
 if ($request->header('Host')){

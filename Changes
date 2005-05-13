@@ -32,10 +32,10 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.09  Mon  Apr 25 2005
         - Correct warning
 0.10  Tue  Apr 26 2005
-        - Correct the function which maneges STACK user 
+        - Correct the function which manages STACK user 
           in order to avoid stack overflow
-
-
+0.11  Fri May 13 2005 
+	- fixes bug on POST method for LWP API  Content-Type
 
 
 
