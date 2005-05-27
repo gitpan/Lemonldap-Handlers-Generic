@@ -11,6 +11,7 @@ ServerName edito-agents.int.foo.bar
 ProxyPass /  http://edito-agents.int.foo.bar:8080
 ProxyPassReverse /  http://edito-agents.int.foo.bar:8080  
 ProxyRemote http http://10.ip.ip.ip:3132
+lemonldapIcs jpeg,gif
 perltranshandler Lemonldap::Handlers::Generic
 PerlSetVar LemonldapDomain int.foo.bar
 PerlSetVar LemonldapConfig /opt/apache/conf/application_new.xml

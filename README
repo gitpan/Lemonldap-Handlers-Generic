@@ -1,4 +1,4 @@
-NAME
+naME
     Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
 
     Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
@@ -94,6 +94,10 @@ DESCRIPTION
    LemonldapPortal
      The url of login page 
 
+   LemonldapIcs extension,extension
+     Give at mod_proxy the process in order to serve request
+    don('t add header , must be reserved for pictures or css
+ 
 SEE ALSO
     Lemonldap(3), Lemonldap::Portal::Standard
 

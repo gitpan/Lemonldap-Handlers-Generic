@@ -17,7 +17,7 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.11';
+$VERSION = '0.12';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -51,6 +51,8 @@ our $RECURSIF;
 our $CACHE1_ENTETE;
 our $GENERAL;
 our $ID_HANDLER_IN_PROCESS;
+our $ICS;
+our $ANONYMOUSFUNC;
 our $NOM=  __PACKAGE__ ;
 #############################
 @ISA = qw(LWP::UserAgent );
@@ -89,6 +91,7 @@ print STDERR "$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:fa
 ## It doesn t be in the same context ; 
 	    undef $LDAPCONTROL;
             undef $CLIENT;
+            undef $ICS;
 	}
 ## now I save the context of handler
 	$ID_HANDLER_IN_PROCESS =$ID_HANDLER;
@@ -199,6 +202,13 @@ $RECURSIF=$_mode  if $_mode;
 my $_proxyext= $r->dir_config('LemonldapProxyExt');
 $PROXYEXT=$_proxyext  if $_proxyext;
 ####################################################
+###   modification for ICS
+###
+####################################################
+my $_ics= $r->dir_config('LemonldapIcs');
+$ICS=$_ics  if $_ics;
+####################################################
+### end   modification for ICS
 
 #
 #
@@ -212,14 +222,45 @@ ATTRLDAP        => $ATTRLDAP
 LDAPCONTROL     => $LDAPCONTROL
 DISABLEDCONTROL => $DISABLEDCONTROL
 RECURSIF        => $RECURSIF
-PROXYEXT        => $PROXYEXT 
+PROXYEXT        => $PROXYEXT
+ICS             => $ICS 
 STOPCOOKIE      => $STOPCOOKIE\n" if $DEBUG ; 
 }
+## modification for ICS
+if (($ICS) && !($ANONYMOUSFUNC))  {
+my $liste = $ICS ;
+my @lmh= split "," ,$liste;
+print STDERR "$ID_HANDLER: Phase : LOADING ICS TABLE  \n" if $DEBUG ; 
+my $lix =Dumper ( @lmh);
+print STDERR  "$ID_HANDLER : TABLE => $lix\n" if $DEBUG;
+#now I buil the function 
+my $sub = get_match_extension(\@lmh);
+$ANONYMOUSFUNC='';
+$ANONYMOUSFUNC =eval  $sub ;
+
+}
+
+
+## end modification for ICS
+
+
+
 ##### end of initialization 
 ## deleted those line  
 my $uri =$r->uri;
 print STDERR "$ID_HANDLER :uri  requested: $uri\n";
+	if ($ICS) {
 ##### end deleted lines 
+	my $match = $ANONYMOUSFUNC->($uri);
+# Stop  process  if match 
+if  ($match eq 'OK' ) {
+           
+print STDERR "$ID_HANDLER :uri ICS matched: $uri\n";
+           return DECLINED;
+    }
+
+    }
+
 	if($PROXY){
 $UA = __PACKAGE__->new;
 $UA->agent(join "/", __PACKAGE__, $VERSION);
@@ -562,14 +603,20 @@ my @stack;
 unshift @stack, $id;
 
 my $config = \@stack;
+####  optimize overflow process ####
+my $warning = $#stack ;
+my $borne = $IPCNB + 4 ; #I keep a small gap
+my %hashs;
+if ($warning >  $borne ) {
+
 
 #### for avoid stack overflow 
-my %hashs;
+
 foreach (@stack) {
 $hashs{$_}=1;
 
 }
-
+}
 ####
 #my $configsx=Dumper ($config);
 #print STDERR "final = $configsx\n";
@@ -579,11 +626,13 @@ $hashs{$_}=1;
   delete $STACK{$to_delete}; 
    }
 #### for avoid stack overflow 
+if ($warning >  $borne ) {
+
 foreach (keys %STACK)  {
 next if /QUEUE/ ;
 delete $STACK{$_} unless $hashs{$_} ;
  }
-
+}
 
 #$Data::Dumper::Purity=1;
 #$Data::Dumper::Terse=1;
@@ -608,6 +657,18 @@ tied(%STACK)->shlock ;
 $STACK{$id} = $trace;
 tied(%STACK)->shunlock ;
 }
+ sub get_match_extension   {
+    my $tablemh= shift;
+my $code = "sub {local \$_ = shift;\n"; 
+foreach (@$tablemh) {
+$code .= "return \"OK\"  if /\\.$_\$/i;\n";  
+}
+$code.= "1;}\n";
+print STDERR "$ID_HANDLER : compiled \n $code\n";
+return $code;
+}
+
+
 sub parseConfig {
     my $tmp =shift;
     $PROXY= $tmp->{Enabledproxy};
@@ -621,6 +682,10 @@ sub parseConfig {
     $STOPCOOKIE= $tmp->{StopCookie};
     $PROXYEXT = $tmp->{ProxyExt};
     $RECURSIF= $tmp->{Recursive};
+## ICS  i must  collect info 
+    $ICS=$tmp->{Ics} ;   
+
+
         }
 1;
 __END__

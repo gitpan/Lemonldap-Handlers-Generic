@@ -37,6 +37,16 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.11  Fri May 13 2005 
 	- fixes bug on POST method for LWP API  Content-Type
 
+0.12  Fri May 27 2005 
+	- a new parameter  ics jpeg,jpg,extension used with mod_proxy
+           directives , increase performance .
+        - optimize overflow ipc management 
+ii
+
+
+
+
+
 
 
 
