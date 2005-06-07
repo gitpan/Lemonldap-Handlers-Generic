@@ -17,7 +17,7 @@ use Lemonldap::Config::Parameters;
 #}
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.12';
+$VERSION = '0.13';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -416,10 +416,22 @@ untie %session;
 
 
 ############################################
+##  new feature , in the new release all header is saving in session
+##  info session MUST BE BEGAN with uid..
+if ($complement =~ /^uid/)  {
+$ligne_h = $complement;
+
+
+}  else 
+{
+
 $ligne_h = $dn;
 if (defined($complement)) {
 $ligne_h.=":$complement";
 } 
+}
+
+
 	    } ### end of search in cache 1 ,2 and 3
 
    } ##  end of cache level 1 

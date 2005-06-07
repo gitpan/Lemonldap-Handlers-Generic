@@ -41,10 +41,11 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 	- a new parameter  ics jpeg,jpg,extension used with mod_proxy
            directives , increase performance .
         - optimize overflow ipc management 
-ii
 
-
-
+0.13  Mon Jun 6  2005
+        - the  header builder  is now in accueil.pl info  session  
+          must be like "uid=xxxx,  : profil" 
+ 
 
 
 
