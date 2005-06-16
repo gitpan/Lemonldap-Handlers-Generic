@@ -46,7 +46,10 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - the  header builder  is now in accueil.pl info  session  
           must be like "uid=xxxx,  : profil" 
  
-
+0.14  Thu Jun 16 2005
+        - uses apache::log  instead STDERR 
+        - correct bug in STOPCOOKIE process
+        - add Potal option available in handler XML  section
 
 
 
