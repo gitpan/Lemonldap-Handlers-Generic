@@ -1,20 +1,22 @@
-package Lemonldap::Handlers::Generic4A2;
+package Lemonldap::Handlers::Generic4a2;
 use strict;
+#use Apache2::Log;#
+
 use warnings;
 #####  use ######
-use Apache();
-use Apache::URI();
+#use Apache();
+use Apache2::URI();
 use Apache::Constants qw(:common :response);
 use Apache::Session::Memorycached;
-
+use BerkeleyDB;
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
-use Apache::Log();
+use Apache2::Log();
 
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.14';
+$VERSION = '0.15';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -216,18 +218,15 @@ $ICS=$_ics  if $_ics;
 #
 #
 #
-# Result 
+# Result
+if ($KEYIPC) {
+	            $KEYIPC .="-$$";
+
+		        }
+
+			
 $log->info("$ID_HANDLER: Phase : handler initialization VARIABLES
-PROXY           => $PROXY
-KEYIPC          => $KEYIPC
-IPCNB           => $IPCNB
-ATTRLDAP        => $ATTRLDAP
-LDAPCONTROL     => $LDAPCONTROL
-DISABLEDCONTROL => $DISABLEDCONTROL
-RECURSIF        => $RECURSIF
-PROXYEXT        => $PROXYEXT
-ICS             => $ICS 
-STOPCOOKIE      => $STOPCOOKIE"); 
+PROXY           => $PROXY KEYIPC          => $KEYIPC IPCNB           => $IPCNB ATTRLDAP        => $ATTRLDAP LDAPCONTROL     => $LDAPCONTROL DISABLEDCONTROL => $DISABLEDCONTROL RECURSIF        => $RECURSIF PROXYEXT        => $PROXYEXT ICS             => $ICS STOPCOOKIE      => $STOPCOOKIE"); 
 }
 ## modification for ICS
 if (($ICS) && !($ANONYMOUSFUNC))  {
@@ -288,11 +287,7 @@ $BASEPRIV=$_basepriv  if $_basepriv;
 my $_portal= $r->dir_config('LemonldapPortal');
 $PORTAL=$_portal  if $_portal;
 ####################################################
-$log->info ( "$ID_HANDLER: Phase : handler AUTHORIZATION VARIABLES
-COOKIE   => $COOKIE
-BASEPUB  => $BASEPUB
-BASEPRIV => $BASEPRIV
-PORTAL   => $PORTAL");
+$log->info ( "$ID_HANDLER: Phase : handler AUTHORIZATION VARIABLES COOKIE   => $COOKIE BASEPUB  => $BASEPUB BASEPRIV => $BASEPRIV PORTAL   => $PORTAL");
 
 #}
 #### Read cache info from  XML config 
@@ -302,7 +297,7 @@ PORTAL   => $PORTAL");
 my $xmlsession= $CONF->findParagraph('session',$CACHE);
 $SERVERS = $CONF->formateLineHash ($xmlsession->{SessionParams});
 
-$log->debug("$ID_HANDLER: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS"); 
+$log->debug("$ID_HANDLER: Phase : handler AUTHORIZATION CACHE CONFIG: $xmlsession"); 
 }
 #
 #
@@ -310,7 +305,7 @@ $log->debug("$ID_HANDLER: Phase : handler AUTHORIZATION CACHE CONFIG: $SERVERS")
 	# AUTHENTICATION
 	# cookie search
 	my $entete2 =$r->headers_in();
-	#my %entete =$r->headers_in();
+	# my %entete =$r->headers_in();
 	my $idx =$entete2->{'Cookie'} ;
 	#my %entete =$r->headers_in();
 	#my $idx =$entete{'Cookie'} ;
@@ -337,12 +332,14 @@ $log->info("$ID_HANDLER: id session : $id<--->$idx");
      $log->info ("$ID_HANDLER: No match in cache level 1 for $id");
               if ($IPCNB)  {  ####  We want use IPC                 
 		  $log->info("$ID_HANDLER :  search in cache level 2 for $id");
-                tie %STACK ,'IPC::Shareable' , $KEYIPC, 
-                            {create => 1 , mode => 0666};   
+                
+		          tie %STACK, 'BerkeleyDB::Btree',
+                                       -Filename => $KEYIPC ,
+		                       -Flags => DB_CREATE ; 
                  $ligne_h = $STACK{$id} ;      
                     if  ($ligne_h) {  ## match in ipc 
 			$log->info  ("$ID_HANDLER :  match in cache level 2 for $id");
-                            expire_session($id) ;# put on the top of stack    
+			#              expire_session($id) ;# put on the top of stack    
                                    } else  { 
 				       $log->info("$ID_HANDLER: No match in cache level 2 for $id");
 }
@@ -363,7 +360,7 @@ $log->info("$ID_HANDLER: id session : $id<--->$idx");
                          ##  tree causes : Too many connection are served.              
                          ##                the server of session was restarted                
                          ##                It's time out                 
-           $log->warning("$ID_HANDLER: ERROR OF LOCKING  ON :$id"); 
+           $log->warn("$ID_HANDLER: ERROR OF LOCKING  ON :$id"); 
 # I say it's time out 
 	return goPortal($r,'t');
                        }
@@ -481,21 +478,19 @@ $r->header_in('Authorization'=> $entete_spec);
 # STOP_COOKIE is used to hide cookie value to the remote application
         # (to avoid programmers to usurp client identities)
         if($STOPCOOKIE) {
-	    $r->headers_in->do(sub {
-		(my $cle ,my $valeur) = @_;
-		if ($valeur=~ /$COOKIE/) {
-
-		    $_[1]=~ s/$COOKIE=(.+?)\b//;
-		    $_[1]=~ s/;\s+;/;/;
-		    $_[1]=~ s/^\s?;//;
-		    $_[1]=~ s/^\s+;//;
-		   
+my $cook =$r->headers_in();
+my $tmp =$cook->{Cookie};
+		if ($tmp=~ /$COOKIE/) {
+		    $tmp=~ s/$COOKIE=(.+?)\b//;
+		    $tmp=~ s/;\s+;/;/;
+		    $tmp=~ s/^\s?;//;
+		    $tmp=~ s/^\s+;//;
+		    $tmp=~ s/^\s+$//;
+		   $cook->{'Cookie'} = $tmp if $tmp;
+		   delete ($cook->{'Cookie'}) unless $tmp; 
 		   $log->debug  ("$ID_HANDLER: STOPCOOKIE done");
-		}
-		1;
-	    });
         }
-
+}
 
 
 ############################ 
@@ -678,9 +673,9 @@ tied(%STACK)->shunlock ;
 sub   save_session {
 my $id = shift;
 my $trace = shift;
-tied(%STACK)->shlock ;
+#tied(%STACK)->shlock ;
 $STACK{$id} = $trace;
-tied(%STACK)->shunlock ;
+#tied(%STACK)->shunlock ;
 }
  sub get_match_extension   {
     my $tablemh= shift;

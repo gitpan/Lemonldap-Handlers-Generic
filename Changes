@@ -51,7 +51,8 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - correct bug in STOPCOOKIE process
         - add Potal option available in handler XML  section
 
-
+0.15  Thu Jun 23 2005
+        - uses BerkeleyDB file instead IPC 
 
 
 

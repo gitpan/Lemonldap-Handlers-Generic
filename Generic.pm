@@ -6,7 +6,7 @@ use Apache();
 use Apache::URI();
 use Apache::Constants qw(:common :response);
 use Apache::Session::Memorycached;
-
+use BerkeleyDB;
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
@@ -14,7 +14,7 @@ use Apache::Log();
 
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.14';
+$VERSION = '0.15';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.03-4" ;
 
@@ -217,17 +217,13 @@ $ICS=$_ics  if $_ics;
 #
 #
 # Result 
+if ($KEYIPC) {
+    $KEYIPC .="-$$";
+
+}
+
 $log->info("$ID_HANDLER: Phase : handler initialization VARIABLES
-PROXY           => $PROXY
-KEYIPC          => $KEYIPC
-IPCNB           => $IPCNB
-ATTRLDAP        => $ATTRLDAP
-LDAPCONTROL     => $LDAPCONTROL
-DISABLEDCONTROL => $DISABLEDCONTROL
-RECURSIF        => $RECURSIF
-PROXYEXT        => $PROXYEXT
-ICS             => $ICS 
-STOPCOOKIE      => $STOPCOOKIE"); 
+PROXY           => $PROXY KEYIPC          => $KEYIPC IPCNB           => $IPCNB ATTRLDAP        => $ATTRLDAP LDAPCONTROL     => $LDAPCONTROL DISABLEDCONTROL => $DISABLEDCONTROL RECURSIF        => $RECURSIF PROXYEXT        => $PROXYEXT ICS             => $ICS  STOPCOOKIE      => $STOPCOOKIE"); 
 }
 ## modification for ICS
 if (($ICS) && !($ANONYMOUSFUNC))  {
@@ -288,11 +284,7 @@ $BASEPRIV=$_basepriv  if $_basepriv;
 my $_portal= $r->dir_config('LemonldapPortal');
 $PORTAL=$_portal  if $_portal;
 ####################################################
-$log->info ( "$ID_HANDLER: Phase : handler AUTHORIZATION VARIABLES
-COOKIE   => $COOKIE
-BASEPUB  => $BASEPUB
-BASEPRIV => $BASEPRIV
-PORTAL   => $PORTAL");
+$log->info ( "$ID_HANDLER: Phase : handler AUTHORIZATION VARIABLES COOKIE   => $COOKIE BASEPUB  => $BASEPUB BASEPRIV => $BASEPRIV PORTAL   => $PORTAL");
 
 #}
 #### Read cache info from  XML config 
@@ -334,12 +326,13 @@ $log->info("$ID_HANDLER: id session : $id<--->$idx");
      $log->info ("$ID_HANDLER: No match in cache level 1 for $id");
               if ($IPCNB)  {  ####  We want use IPC                 
 		  $log->info("$ID_HANDLER :  search in cache level 2 for $id");
-                tie %STACK ,'IPC::Shareable' , $KEYIPC, 
-                            {create => 1 , mode => 0666};   
-                 $ligne_h = $STACK{$id} ;      
+               tie %STACK, 'BerkeleyDB::Btree',
+                         -Filename => $KEYIPC ,
+		         -Flags => DB_CREATE ;
+		  $ligne_h = $STACK{$id} ;      
                     if  ($ligne_h) {  ## match in ipc 
 			$log->info  ("$ID_HANDLER :  match in cache level 2 for $id");
-                            expire_session($id) ;# put on the top of stack    
+#                            expire_session($id) ;# put on the top of stack    
                                    } else  { 
 				       $log->info("$ID_HANDLER: No match in cache level 2 for $id");
 }
@@ -360,7 +353,7 @@ $log->info("$ID_HANDLER: id session : $id<--->$idx");
                          ##  tree causes : Too many connection are served.              
                          ##                the server of session was restarted                
                          ##                It's time out                 
-           $log->warning("$ID_HANDLER: ERROR OF LOCKING  ON :$id"); 
+           $log->warn("$ID_HANDLER: ERROR OF LOCKING  ON :$id"); 
 # I say it's time out 
 	return goPortal($r,'t');
                        }
@@ -674,9 +667,9 @@ tied(%STACK)->shunlock ;
 sub   save_session {
 my $id = shift;
 my $trace = shift;
-tied(%STACK)->shlock ;
+#tied(%STACK)->shlock ;
 $STACK{$id} = $trace;
-tied(%STACK)->shunlock ;
+#tied(%STACK)->shunlock ;
 }
  sub get_match_extension   {
     my $tablemh= shift;

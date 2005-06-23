@@ -1,5 +1,5 @@
 package Lemonldap::Handlers::GenericMH1;
-####  handler generic for lemonldap SSo system managingthe MultiHoming
+####  handler generic for lemonldap SSo system managing the MultiHoming
 use strict;
 #use warnings;
 #####  use ######
@@ -8,6 +8,7 @@ use Apache::URI();
 use Apache::Constants qw(:common :response);
 use Apache::Session::Memorycached;
 #use Apache::ModuleConfig;
+use BerkeleyDB;
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
@@ -17,7 +18,7 @@ use Apache::Log();
 
 #### common declaration #######
 our (@ISA, $VERSION, @EXPORTS);
-$VERSION = '0.14';
+$VERSION = '0.15';
 our $VERSION_LEMONLDAP="1.1" ;
 our $VERSION_INTERNAL="0.1" ;
 
@@ -215,18 +216,13 @@ $MULTIHOMINGLINE=$_multihomingline  if $_multihomingline;
 #
 #
 # Result 
-$log->info("$ID_HANDLER: Phase : handler initialization VARIABLES
-PROXY           => $PROXY
-KEYIPC          => $KEYIPC
-IPCNB           => $IPCNB
-ATTRLDAP        => $ATTRLDAP
-LDAPCONTROL     => $LDAPCONTROL
-DISABLEDCONTROL => $DISABLEDCONTROL
-RECURSIF        => $RECURSIF
-PROXYEXT        => $PROXYEXT
-MULTI             => $MULTIHOMINGLINE 
-STOPCOOKIE      => $STOPCOOKIE"); 
+
+    
+
+$log->info("$ID_HANDLER: Phase : handler initialization VARIABLES PROXY           => $PROXY KEYIPC          => $KEYIPC IPCNB           => $IPCNB ATTRLDAP        => $ATTRLDAP LDAPCONTROL     => $LDAPCONTROL DISABLEDCONTROL => $DISABLEDCONTROL RECURSIF        => $RECURSIF PROXYEXT        => $PROXYEXT MULTI             => $MULTIHOMINGLINE STOPCOOKIE      => $STOPCOOKIE"); 
 }
+
+
 ##############################  LOADER OF REGEXP #################
 my $liste = $MULTIHOMINGLINE ;
 my $control = crc32($liste);
@@ -287,7 +283,7 @@ my $uri =$r->uri;
 	$MHURI = $ANONYMOUSFUNC->($uri);
 # Stop  process  if no multihosting
 if (($MHURI ==1) || (!($MHURI))) { 
-    $log->warning ("$ID_HANDLER :multihoming failed for  $uri") ;
+    $log->warn ("$ID_HANDLER :multihoming failed for  $uri") ;
 
     return DECLINED  ;
 }
@@ -309,21 +305,12 @@ if (($MHURI ==1) || (!($MHURI))) {
         $MOTIFIN= $configm->{'MOTIFIN'};
 	$MOTIFOUT=$configm->{'MOTIFOUT'};
 
+if ($KEYIPC) {
+	    $KEYIPC .="-$$";
 
-$log->debug( "$ID_HANDLER: Phase : handler initialization  LOCATION VARIABLES $MHURI
-LOCATION        => $MHURI
-PROXY           => $PROXY
-KEYIPC          => $KEYIPC
-IPCNB           => $IPCNB
-ATTRLDAP        => $ATTRLDAP
-LDAPCONTROL     => $LDAPCONTROL
-DISABLEDCONTROL => $DISABLEDCONTROL
-RECURSIF        => $RECURSIF
-PROXYEXT        => $PROXYEXT 
-BASEPRIV        => $BASEPRIV
-MOTIFIN         => $MOTIFIN
-MOTIFOUT         => $MOTIFOUT
-STOPCOOKIE      => $STOPCOOKIE");
+    }
+
+$log->debug( "$ID_HANDLER: Phase : handler initialization  LOCATION VARIABLES $MHURI LOCATION        => $MHURI PROXY           => $PROXY KEYIPC          => $KEYIPC IPCNB           => $IPCNB ATTRLDAP        => $ATTRLDAP LDAPCONTROL     => $LDAPCONTROL DISABLEDCONTROL => $DISABLEDCONTROL RECURSIF        => $RECURSIF PROXYEXT        => $PROXYEXT BASEPRIV        => $BASEPRIV MOTIFIN         => $MOTIFIN MOTIFOUT         => $MOTIFOUT STOPCOOKIE      => $STOPCOOKIE");
 
 ###
 ###
@@ -417,12 +404,15 @@ $log->debug("$ID_HANDLER/$MHURI: Phase : handler AUTHORIZATION CACHE CONFIG: $SE
      $log->info ("$ID_HANDLER/$MHURI: No match in cache level 1 for $id");
                     if ($IPCNB)  {  ####  We want use IPC                 
       		  $log->info("$ID_HANDLER/$MHURI :  search in cache level 2 for $id");
-                               tie %STACK ,'IPC::Shareable' , $KEYIPC, 
-                            {create => 1 , mode => 0666};   
+             tie %STACK, 'BerkeleyDB::Btree',
+                            -Filename => $KEYIPC ,
+	                                -Flags => DB_CREATE ;
+
+
                  $ligne_h = $STACK{$id} ;      
                     if  ($ligne_h) {  ## match in ipc 
 			$log->info  ("$ID_HANDLER/$MHURI :  match in cache level 2 for $id");
-                                          expire_session($id) ;# put on the top of stack    
+			# expire_session($id) ;# put on the top of stack    
                                    } else  { 
 				       $log->info("$ID_HANDLER/$MHURI: No match in cache level 2 for $id");
  }
@@ -765,9 +755,9 @@ tied(%STACK)->shunlock ;
 sub   save_session {
 my $id = shift;
 my $trace = shift;
-tied(%STACK)->shlock ;
+#tied(%STACK)->shlock ;
 $STACK{$id} = $trace;
-tied(%STACK)->shunlock ;
+#tied(%STACK)->shunlock ;
 }
 sub get_match_sub   {
     my $tablemh= shift;
