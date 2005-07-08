@@ -1,16 +1,15 @@
-package Lemonldap::Handlers::Generic;
+package Lemonldap::Handlers::Generic4a2;
 use strict;
 use warnings;
 #####  use ######
-use Apache();
-use Apache::URI();
+use Apache2::URI();
 use Apache::Constants qw(:common :response);
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
 use Lemonldap::Config::Initparam;
 use Lemonldap::Handlers::Utilities;
-use Apache::Log();
+use Apache2::Log();
 #### common declaration #######
 our ( @ISA, $VERSION, @EXPORTS );
 $VERSION = '1.00';
@@ -183,8 +182,11 @@ $SAVE_MHURI= $MHURI;
 
     # AUTHENTICATION
     # cookie search
-    my %entete = $r->headers_in();
-    my $idx    = $entete{'Cookie'};
+    #for apache 2 
+ my $entete2 =$r->headers_in();
+ my $idx =$entete2->{'Cookie'};  
+#    my %entete = $r->headers_in();
+#    my $idx    = $entete{'Cookie'};
     $__cookie = $idx;
 
     # Load id value from cookie

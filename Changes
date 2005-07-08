@@ -54,6 +54,7 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 0.15  Thu Jun 23 2005
         - uses BerkeleyDB file instead IPC 
 
-
-
-
+1.0   Fri Jul 08 2005
+        - rewrite all handler 
+        - merge multihoming with generic handler
+        - add Error handler  in order to provide a tidy  error page  
