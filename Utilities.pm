@@ -5,7 +5,7 @@ use BerkeleyDB;
 use MIME::Base64;
 use strict;
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '1.00';
+$VERSION = '1.01';
 our $VERSION_LEMONLDAP = "1.2";
 our $VERSION_INTERNAL  = "0.03-4";
 my %STACK;
@@ -14,7 +14,9 @@ sub cache3
     my ($conf,$id) =@_;
 my %config  =%$conf;
 my $SERVERS = $config{SERVERS};
+
 my %session ;
+
    tie %session, 'Apache::Session::Memorycached', $id,$SERVERS;
  unless ($session{dn}) {  ##  the cookie is present but i can't  retrieve session
                          ##  tree causes : Too many connection are served.              

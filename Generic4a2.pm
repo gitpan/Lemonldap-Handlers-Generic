@@ -12,7 +12,7 @@ use Lemonldap::Handlers::Utilities;
 use Apache2::Log();
 #### common declaration #######
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '1.00';
+$VERSION = '1.01';
 our $VERSION_LEMONLDAP = "1.2";
 our $VERSION_INTERNAL  = "0.03-4";
 
@@ -46,11 +46,11 @@ sub handler {
 ## collect httpd param
 ########################
     my $con = $r->dir_config();
-    unless ( $CONFIG{OK} ) {
-        my $conf = &Lemonldap::Config::Initparam::init_param_httpd($con)
-          unless $CONFIG{OK};
+  #  delete  $CONFIG{OK} ;
+  #  unless ( $CONFIG{OK} ) {
+        my $conf = &Lemonldap::Config::Initparam::init_param_httpd($con);
         %CONFIG = %$conf;
-    }
+  
 
 ### I will try  retieve ID_HANDLER from  httpd conf
     if ( $CONFIG{ID_HANDLER} ) {
@@ -344,7 +344,9 @@ sub proxy_handler {
 ###begin: some modification like mod_proxy does
     if ( $request->header('Host') ) {
         my $host = $request->header('Host');
-        $host =~ s/$CONFIG{BASEPUB}/$CONFIG{BASEPRIV}/;
+        (my $priv) = $CONFIG{BASEPRIV}=~ /http:\/\/(.+)/ ; 
+        (my $pub) = $CONFIG{BASEPUB}=~ /http:\/\/(.+)/ ; 
+      	$host =~ s/$pub/$priv/;
         $request->header( 'Host' => $host );
 
     }

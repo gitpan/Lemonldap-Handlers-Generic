@@ -58,3 +58,5 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
         - rewrite all handler 
         - merge multihoming with generic handler
         - add Error handler  in order to provide a tidy  error page  
+1.01  Thu Sep 08 2005 
+        -correct bug in context management
