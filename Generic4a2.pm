@@ -12,7 +12,7 @@ use Lemonldap::Handlers::Utilities;
 use Apache2::Log();
 #### common declaration #######
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '1.01';
+$VERSION = '1.02';
 our $VERSION_LEMONLDAP = "1.2";
 our $VERSION_INTERNAL  = "0.03-4";
 
@@ -135,7 +135,7 @@ if (($MHURI eq '1') || (!($MHURI))) {
     return DECLINED  ;
 }
 ## now I switche config with mh config ;
-if ($MHURI  ne $SAVE_MHURI) {
+#if ($MHURI  ne $SAVE_MHURI) {
 # reload conf   
 $log->info("$CONFIG{ID_HANDLER} :SWITCH CONFIG $MHURI");
 
@@ -145,7 +145,7 @@ $log->info("$CONFIG{ID_HANDLER} :SWITCH CONFIG $MHURI");
 #print STDERR  "GERMAN $f\n"; 
 undef $CLIENT;
 
-}   
+#}   
 $log->info("$CONFIG{ID_HANDLER} :MULTIHOMING ON");
 
 $SAVE_MHURI= $MHURI; 
@@ -344,8 +344,8 @@ sub proxy_handler {
 ###begin: some modification like mod_proxy does
     if ( $request->header('Host') ) {
         my $host = $request->header('Host');
-        (my $priv) = $CONFIG{BASEPRIV}=~ /http:\/\/(.+)/ ; 
-        (my $pub) = $CONFIG{BASEPUB}=~ /http:\/\/(.+)/ ; 
+        (my $priv) = $CONFIG{BASEPRIV}=~ /:\/\/(.+)/ ; 
+        (my $pub) = $CONFIG{BASEPUB}=~ /:\/\/(.+)/ ; 
       	$host =~ s/$pub/$priv/;
         $request->header( 'Host' => $host );
 
