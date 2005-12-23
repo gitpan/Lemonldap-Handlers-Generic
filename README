@@ -1,98 +1,140 @@
+Lemonldap-Handlers-Generic version 2
+=======================================
 NAME
-    Lemonldap::Handlers::Generic - Perl extension for Lemonldap sso system
+        Lemonldap::Handlers::Generic  - Perl extension for Lemonldap sso system
 
-    Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
-    system
+        Lemonldap::Handlers::Generic4a2 - Handler for Apache2 Lemonldap SSO
+        system
     
-    Lemonldap::Handlers::GenericSSL - Handler full SSL for Lemonldap sso system
+    
+INSTALLATION
 
-    Lemonldap::Handlers::Generic4a2 - Handler full SSL  Apache2 Lemonldap SSO
+To install this module type the following:
 
-    Lemonldap::Handlers::GenericMH1 - Handler with multihoming facilities
+   perl Makefile.PL
+   make
+   make test
+   make install
 
 SYNOPSIS
     In httpd.conf
 
-    <location mylocation> Lemonldap::Handlers::Generic;
-
-    </location>
-
+      .....
+      perltranshandler Lemonldap::Handlers::Generic4a2
+      .....
+ 
 DESCRIPTION
-  Parameters
-   LemonldapConfig "/foo/bar/file_config.xml"
-     The filename of the mean XML Config   :It's REQUIRED 
+     Generic4a2 is the central piece of  websso framework .
+     This module provides several methods but the principal goal of this is the handler function .
+     It can be combined with mod_proxy or mod_rewrite and all other apache's  modules .
+     It provides also an built-in  http proxy with LWP .
+     see http://lemonldap.sf.net for more infos .
  
-   LemonldapConfigIpcKey GLUE
-     The identifier of config segment IPC  :It's REQUIRED 
+  Parameters (see also doc folder)
+     A minimal configuration  must provide  infos about :
 
-   LemonldapDomain foo.bar
-     If present , it fixes the value of domain for the  application protected by  this handler (see below) 
+    config
+       LemonldapConfig "/foo/bar/file_config.xml"
+       The filename of the mean XML Config   :It's REQUIRED
 
-   LemonldapHandlerId  <xml section>
-     If present the configuration of handler is read from XML config backend.
-    You can overlay XML config backend with httpd.conf 
+    domain
+      LemonldapDomain foo.bar
+      It fixes the value of domain for the  application protected by  this handler (see below) 
 
-   LemonldapEnabledproxy  0|1
-     0 : don't use built-in proxy (configuration  must use with mod_proxy or mod_rewrite )
-     1 : use built-in proxy
-     default : 0 
+    xml section in config
+      LemonldapHandlerId  <xml section>
 
-   LemonldapDEBUG  0|1
-     0 : mode debug disabled
-     1 : mode debug enabled
-     default : 0 
+      It fixes the value of XML section in config 
 
-   LemonldapIpcNb     0..nn
-     IPNB is the number of session which you want to keep in cache evel 2 (IPC) 
+  Example (a KISS example, see also eg folder)
+    In httpd.conf
 
-     min value : 0  (don't use cache IPC level2) 
-     max value : ???  : It depends of your server 
-     recommended : 100
-     The youngest value replace the oldest .
+     <virtualHost 127.0.0.1:80>
+     servername authen.demo.net
+     PerlModule Apache2::compat
+     PerlModule Bundle::Apache2
+     PerlModule Lemonldap::Handlers::Generic4a2 
+     perltranshandler Lemonldap::Handlers::Generic4a2
+     PerlSetVar LemonldapDomain demo.net
+     PerlSetVar LemonldapConfig /usr/local/apache/conf/application_new.xml
+     PerlSetVar LemonldapHandlerID myintranet
+     proxypass /intranet http://lemonldap.sourceforge.net
+     proxypassreverse /intranet  http://lemonldap.sourceforge.net
+     documentroot /usr/local/apache/htdocs
+     </virtualhost>
 
-   LemonldapIpcKey   '4 carac'
-     A string of 4 caracteres (see IPC::Shareable doc) 
-     It must be 'unique'  . 
+     In /usr/local/apache/conf/application_new.xml
+      <lemonconfig>
+            <domain    id="demo.net"
+                       Cookie="lemondemo"
+                       >
+            <handler 
+                    id="myintranet" 
+                    DisabledControl="1"
+                   />  
+            </domain>
+      </lemonconfig>
 
-   LemonldapAttrLdap  'string'
-     The first level of hash session  , whi can to be the name of LDAP attribute
-     see below
+     Now you can put http://authen.demo.net/intranet/ in your browser and you will see lemonldap's  site
+     AND now you can control who and where goes on your site .
+  
+     You can pass parameters from httpd.conf with perlsetvar  facilities  or put them in xml file
 
-   LemonldapCodeAppli 'string'
-     The second  level of hash session  , whi can to be the code of application
-     The access of %session if $session{LemonldapAttrLDAP}{lemonldapCodeAppli} 
-     with the value of key = profil .
- 
-   LemonldapDisabled  0|1
-     0 : Control the request (default)
-     1 : Don't control the request (useful for jpeg ) 
+  Functions
+    handler
+      It's the mean  function which does all jobs . If the enebledproxy parameter is set to 1  ,this function
+      will push proxy_handler function reference on  the handler's stack . If not it returns DECLINED (mod_proxy will be actived) 
 
-   LemonldapStopCookie  0|1
-     0 : Let pass the lemonldap cookie to application (default).
-     1 : Block the lemonldap cookie. 
+    proxy_handler
+      It's the built-in proxy (LWP)  web embedded  in lemonldap framework . It is  actived by  enabledproxy parameter .
+      Some parameters are about this proxy and its behaviour     
 
-   LemonldapRECURSIVE  0|1
-     0 : Let LWP chases redirection (default).
-     1 : Let Client chases redirection instead LWP. 
+    _lemonldap_internal
+       append this keyword at the end of url and you will can see all config for a specific apache's child
 
-   LemonldapProxyExt  0|1
-     0 : Let LWP resquets on ressource (default).
-     1 : force LWP to request via an external proxy. 
+    _lemonldap_debug
+       append this keyword at the end of url and you will can see all headers send to host.
+       Available  ONLY with built-in proxy
 
-   LemonldapSession  'cachelevel 3'
-     It is the name of XML section  which  describes the backend used in order to store  the  session .
+  Features
+    Generic4a2 is build arround perl's modules .
 
-   LemonldapCookie 'name_of_cookie'
-     eg: lemontest
- 
-   LemonldapBasePub
-     The public host name  avaiable by user 
+    Those modules are :
 
-   LemonldapBasePriv
-     The private host name  not avaiable by user 
+    Utilities :
+       collection of function
 
-   LemonldapPortal
-     The url of login page 
+    Core :
+       It provides basics services like the cache service, forge header service or authorization service.
+  
+      Core.pm  can use YOUR own services for all this cycle . It's plugger . Lemonldap framework is available 
+      with somes services but you can with Core.pm propose your schemas.
+      News parameters  were added in XML DTD in order to describe the sequence.
+
+    MatrixPolicy :
+      manage authorization process , based on the hash of session (like preceding version)   
+
+    Memsession :
+      manage the backend of session (cache level 3) 
+
+    AuthorizationHeader :
+      manage the construction of header 
+
+    RewriteHTML :
+      Rewrite on fly html source in order to ajust somes tags like BASE , href or src
+      Available  ONLY with built-in proxy
+  
+   More features
+    Authentification
+      Keep in mind  that the handler doesn't know HOW authenticate anybody but only knows WHERE authenticate . 
+      The parameter 'portal' tells it where to send the authentification request. 
+
+    Caches
+      Thre are three levels of cache in lemonldap . 
+
+      *First cache (level 1) is a very KISS  , it's a memory structure in the program .
+      *Next  cache (level 2) is realised by using berkeleyDB hash
+      *Last cache (level 3) is realised by using memcached (see Apache::Session::Memorycached on CPAN)
 
 SEE ALSO
     Lemonldap(3), Lemonldap::Portal::Standard
@@ -104,10 +146,10 @@ SEE ALSO
 
     Eric German, <germanlinux@yahoo.fr>
     Xavier Guimard, <x.guimard@free.fr>
-    isabelle Serre , <isabelle.serre@justice.gouv.fr>
+    Isabelle Serre, <isabelle.serre@justice.gouv.fr>
 
 COPYRIGHT AND LICENSE
-    Copyright (C) 2004 by Eric German & Xavier Guimard  & Isabelle Serre
+    Copyright (C) 2004 by Eric German & Xavier Guimard & Isabelle Serre
 
     Lemonldap originaly written by Eric german who decided to publish him in
     2003 under the terms of the GNU General Public License version 2.
@@ -132,4 +174,7 @@ COPYRIGHT AND LICENSE
       A copy of the GNU General Public License is available in the source tree;
       if not, write to the Free Software Foundation, Inc.,
       59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
+
 

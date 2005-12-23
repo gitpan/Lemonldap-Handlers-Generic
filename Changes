@@ -1,65 +1,6 @@
 Revision history for Perl extension Lemonldap::Handlers::Generic.
 
-0.01  Fri Feb 11 09:44:13 2005
-	- original version; created by h2xs 1.22 with options
-		-AXn Lemonldap::Handlers::Generic
-0.02  Mer Feb 16 2005
-        - correct bug
-        - modification of sereval parameters with xml model 
-        - modifications in pod documentation
-0.03  Thu Mar 10 2005
-        - correct big bug in id_handlers config  namage
-        - correct syntax in option
-        - correct display for debug 
-0.04  Fri Mar 11 2005
-        - delete dynaloader  
-0.05  Fri Mar 11 2005
-        - undef cache level 1 for different naming context  
-0.06  Tue Mar 15 2005
-        - modify header "Location" of response application 
-0.07  Wed  Mar 30 2005
-        - modify header  Connection / host with LWP built-in proxy
-        - correct bug :Case fault on base public parameter name in XML config	
-        - correct bug : invalid call to parseconfig 
-        - Handler  Generic4a2.pm  for Apache2
-        - correct Basepub to BasePub in parseConfig
-0.08  Fri  Apr 22 2005
-        - modify header  Connection / host with LWP built-in proxy
-        - correct bug :Case fault on base public parameter name in XML config	
-        - correct bug : invalid call to parseconfig 
-        - add  Multihoming handler and 2 SSL handlers 
+2.00  Fri Oct  7 13:47:41 2005
+	- original version; created by h2xs 1.23 with options
+		-XAn Lemonldap::Handlers::Generic
 
-0.09  Mon  Apr 25 2005
-        - Correct warning
-0.10  Tue  Apr 26 2005
-        - Correct the function which manages STACK user 
-          in order to avoid stack overflow
-0.11  Fri May 13 2005 
-	- fixes bug on POST method for LWP API  Content-Type
-
-0.12  Fri May 27 2005 
-	- a new parameter  ics jpeg,jpg,extension used with mod_proxy
-           directives , increase performance .
-        - optimize overflow ipc management 
-
-0.13  Mon Jun 6  2005
-        - the  header builder  is now in accueil.pl info  session  
-          must be like "uid=xxxx,  : profil" 
- 
-0.14  Thu Jun 16 2005
-        - uses apache::log  instead STDERR 
-        - correct bug in STOPCOOKIE process
-        - add Potal option available in handler XML  section
-
-0.15  Thu Jun 23 2005
-        - uses BerkeleyDB file instead IPC 
-
-1.0   Fri Jul 08 2005
-        - rewrite all handler 
-        - merge multihoming with generic handler
-        - add Error handler  in order to provide a tidy  error page  
-1.01  Thu Sep 08 2005 
-        -correct bug in context management
-1.02  Fri Sep 30 2005 
-        -correct bug in context management for multihoming 
-        -correct bug in host header (failed in https case) 
