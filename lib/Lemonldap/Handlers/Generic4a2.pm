@@ -1,6 +1,5 @@
 package Lemonldap::Handlers::Generic4a2;
 use strict;
-use warnings;
 #####  use ######
 use Apache2::URI();
 use Apache::Constants qw(:common :response);
@@ -15,7 +14,7 @@ use Apache2::ServerRec ();
 
 #### common declaration #######
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '2.00';
+$VERSION = '2.01';
 our $VERSION_LEMONLDAP = "2.0";
 our $VERSION_INTERNAL  = "2.0";
 
