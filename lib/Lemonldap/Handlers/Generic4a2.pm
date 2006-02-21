@@ -11,10 +11,9 @@ use Lemonldap::Handlers::Utilities;
 use Lemonldap::Handlers::Core;
 use Apache2::Log();
 use Apache2::ServerRec ();
-
 #### common declaration #######
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '2.01';
+$VERSION = '2.02';
 our $VERSION_LEMONLDAP = "2.0";
 our $VERSION_INTERNAL  = "2.0";
 
@@ -34,9 +33,19 @@ my %STACK;
 my $ID_SAVE;
 ### this anonymous function will be call when child dead , it will delete berkeley db file
    my $cleanup =sub {
-   my   $s = Apache2::ServerUtil->server;
-   my $srv_cfg = $s->dir_config;
-   my $path=$srv_cfg->{'lemonldappathdb'} ;
+	   my   $s = Apache2::ServerUtil->server;
+	   my $srv_cfg = $s->dir_config;
+
+my $vhosts = 0;
+my $path_other; 
+ for (my $ser = $s->next; $ser; $ser = $ser->next) {
+	         $vhosts++;
+   $path_other =$ser->dir_config('lemonldappathdb') unless $path_other ;
+  
+		 
+		   }
+	  
+my $path=$srv_cfg->{'lemonldappathdb'}||$path_other ;
    unlink "$path/$$.db" if $path;
 };
 Apache->push_handlers(PerlChildExitHandler => $cleanup );
