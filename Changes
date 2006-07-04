@@ -7,7 +7,6 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
 
 2.01 Wed Dec 28 10:00:00 2005
        -minor changes in doc  
-2.02 tue feb 21 15:00:00 2006
-       -correct bug in cleanup function 
- 
- 
+3.0.0 Tue Jul 04 10:00:00 2006
+       - great modification from DGI 
+       

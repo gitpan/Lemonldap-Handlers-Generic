@@ -10,10 +10,10 @@ sub get {
     my %_param =@_;
     my $profil = $_param{profil};
     my $dn = $_param{dn};
-      my $header= $_param{config}->{HEADER} ||'Authorization';
+      my $header= $_param{config}->{SENDHEADER} ||'Authorization';
     my $self;
     my $ligne_h ;
-    if ($profil eq  '_ALLOW_') {$profil=0 ; }
+    if ($profil eq  '_ALLOW_') {$profil="" ; }
    if ($profil =~ /^uid/)  {
 $ligne_h = $profil;
 }  else 
@@ -36,7 +36,7 @@ sub forge {
       $self->{decoded} = $line ;
 my ($user) = $line =~ /(uid.+?),/;
    $self->{user} =$user;   
-my $header= $_param{config}->{HEADER} ||'Authorization';
+my $header= $_param{config}->{SENDHEADER} ||'Authorization';
  return 0 if ($header  eq 'NONE' ) ;
      
   ( my $b,my $e)   = $line=~/(.+)%b64%(.+)%b64%/;
@@ -81,7 +81,7 @@ If you want use your own header  method you must use PLUGINHEADER parameter like
 
  Your module must provide the 'get' and 'forge'  methods .
  
- Those methods work with HEADER parameter which tells what will be the  header (NONE value for no header)   
+ Those methods work with SENDHEADER parameter which tells what will be the  header (NONE value for no header)   
 
 =head1 SEE ALSO
 

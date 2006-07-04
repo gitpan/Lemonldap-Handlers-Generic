@@ -18,7 +18,6 @@ sub get
 my $SERVERS = $config->{SERVERS};
 
 my %session ;
-
    tie %session, 'Apache::Session::Memorycached', $id,$SERVERS;
  unless ($session{dn}) {  ##  the cookie is present but i can't  retrieve session
                          ##  three causes : Too many connection are served.              
@@ -26,7 +25,7 @@ my %session ;
                          ##                It's time out                 
  
      untie %session ;
-     return 0;
+
 # I say it's time out 
                     }
     my %_session = %session;
@@ -55,7 +54,7 @@ my %session ;
 
 =head2 Overlay
 
-If you wat use your own session backend  method you must use PLUGINBACKEND parameter like this :
+If you wat use your own session backend  method you must use SESSIONSTOREPLUGIN parameter like this :
   in httpd.conf : perlsetvar lemonldappluginbackend MyModule 
 
  Your module must accept  2 parameters : config (all the hash of config ) and id (collect in the cookie )

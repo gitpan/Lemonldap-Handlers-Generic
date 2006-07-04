@@ -49,7 +49,7 @@ return $html;
 
 =head2 Overlay
 
- If you wat use your own rewriter  method you must use PLUGINHTML parameter like this :
+ If you wat use your own rewriter  method you must use REWRITEHTMLPLUGIN parameter like this :
  in httpd.conf : perlsetvar lemonldappluginhtml MyModule 
 
  Your module must accept  4 parameters : host :(the virtual host actived) ,target (the host target) 

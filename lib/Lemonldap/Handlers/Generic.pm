@@ -26,7 +26,6 @@ my %CONFIG;
 my %CLIENT;
 my $SAVE_MHURI;
 my $NOM;
-my $ID_HANDLER_IN_PROCESS; 
 my $UA;
 @ISA = qw(LWP::UserAgent );
 my $ID_COLLECTED ;
@@ -59,33 +58,33 @@ sub handler {
   my $con = $r->dir_config();  
     my $in_process= $r->dir_config('lemonldaphandlerid');
     if  ($CONFIG{$in_process}) {
-     $log->debug("$CONFIG{$in_process}->{ID_HANDLER} XML $CONFIG{$in_process}->{XML} config already in use");
+     $log->debug("$CONFIG{$in_process}->{HANDLERID} XML $CONFIG{$in_process}->{XML} config already in use");
    $ID_COLLECTED= $in_process; 
      }  else {
-    my $conf = &Lemonldap::Config::Initparam::init_param_httpd($con);
-     $ID_COLLECTED = $conf->{ID_HANDLER};
+    my $conf = &Lemonldap::Config::Initparam::init_param_httpd($log,$con);
+     $ID_COLLECTED = $conf->{HANDLERID};
     $CONFIG{$ID_COLLECTED} = $conf;
-   ### I will try  retieve ID_HANDLER from  httpd conf
+   ### I will try  retieve HANDLERID from  httpd conf
     if ( $ID_COLLECTED ) {
     $NOM= $ID_COLLECTED;
         $messagelog =
-"$NOM Phase : handler initialization LOAD ID_HANDLER httpd.conf:$CONFIG{$ID_COLLECTED}->{ID_HANDLER} : succeded";
+"$NOM Phase : handler initialization LOAD HANDLERID httpd.conf:$CONFIG{$ID_COLLECTED}->{HANDLERID} : succeded";
     }
     else {
 # I don't find anything for this handler in order to make link with XLM conf section
         $messagelog =
-"$NOM: Phase : handler initialization LOAD ID_HANDLER httpd.conf:failed";
+"$NOM: Phase : handler initialization LOAD HANDLERID httpd.conf:failed";
     }
     $log->info($messagelog);
 
 ############################################
      
-#  my $ref = $CONFIG{$ID_COLLECTED}->{ID_HANDLER};
+#  my $ref = $CONFIG{$ID_COLLECTED}->{HANDLERID};
 #   $ref =~  s/\/.+// ;
         $log->debug(
-"$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: Phase : handler initialization LOAD XML file $CONFIG{$ID_COLLECTED}->{FILE} and $CONFIG{$ID_COLLECTED}->{GLUE}"
+"$CONFIG{$ID_COLLECTED}->{HANDLERID}: Phase : handler initialization LOAD XML file $CONFIG{$ID_COLLECTED}->{CONFIGFILE} and $CONFIG{$ID_COLLECTED}->{CONFIGDBPATH}"
         );
-        $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: domain matched $CONFIG{$ID_COLLECTED}->{DOMAIN}");
+        $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: domain matched $CONFIG{$ID_COLLECTED}->{DOMAIN}");
         $conf = &Lemonldap::Config::Initparam::init_param_xml( $CONFIG{$ID_COLLECTED} );
         $log->debug("$conf->{message}");
         my $c = &Lemonldap::Config::Initparam::merge( $CONFIG{$ID_COLLECTED}, $conf );
@@ -95,16 +94,15 @@ sub handler {
 }
  
 ## now I save the context of handler
-    $ID_HANDLER_IN_PROCESS = $CONFIG{$ID_COLLECTED}->{ID_HANDLER};
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} end of initialization");
-## addon  for ICS
-        if ( ( $CONFIG{$ID_COLLECTED}->{ICS} ) && !($CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC}) ) {
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID} end of initialization");
+## addon  for FASTPATTERNS
+        if ( ( $CONFIG{$ID_COLLECTED}->{FASTPATTERNS} ) && !($CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC}) ) {
             my $sub =
-              &Lemonldap::Config::Initparam::built_functionics( $CONFIG{$ID_COLLECTED}->{ICS} );
+              &Lemonldap::Config::Initparam::built_functionics( $CONFIG{$ID_COLLECTED}->{FASTPATTERNS} );
             $CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC_SRC} =  $sub;
             $CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC} = eval "$sub";
             $log->debug(
-                "$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: Phase : ICS TABLE  LOADED : $sub");
+                "$CONFIG{$ID_COLLECTED}->{HANDLERID}: Phase : FASTPATTERNS TABLE  LOADED : $sub");
         }
 ## addon for multihoming 
         if (($CONFIG{$ID_COLLECTED}->{MULTIHOMING}) && !($CONFIG{$ID_COLLECTED}->{SELECTOR})) {
@@ -123,14 +121,14 @@ sub handler {
 ##### begin  process request
     my $uri = $r->uri;
 
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :uri  requested: $uri");
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID} :uri  requested: $uri");
 ####  multihoming 
 my $MHURI;
     if ($CONFIG{$ID_COLLECTED}->{MH})  {
   	$MHURI = $CONFIG{$ID_COLLECTED}->{SELECTOR}->($uri);
 # Stop  process  if no multihosting
     if (($MHURI eq '1') || (!($MHURI))) { 
-    $log->warn ("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :multihoming failed for  $uri") ;
+    $log->warn ("$CONFIG{$ID_COLLECTED}->{HANDLERID} :multihoming failed for  $uri") ;
     return DECLINED  ;
 }
 # load combo config   
@@ -138,15 +136,15 @@ my $MHURI;
 	my $old_collected = $ID_COLLECTED;
   $ID_COLLECTED=$MHURI ;  
 
-$log->info("$CONFIG{$old_collected}->{ID_HANDLER} :SWITCH CONFIG $MHURI");
+$log->info("$CONFIG{$old_collected}->{HANDLERID} :SWITCH CONFIG $MHURI");
 	if ($CONFIG{$ID_COLLECTED}->{XML}) {
-$log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :MULTIHOMING already in use ");
+$log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID} :MULTIHOMING already in use ");
 }   else {
  my $c = &Lemonldap::Config::Initparam::mergeMH( $CONFIG{$old_collected}, $MHURI );
    $CONFIG{$ID_COLLECTED}=$c;
 }
 
-$log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :MULTIHOMING ON");
+$log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID} :MULTIHOMING ON");
     }
 #########################
 #####  for developper ###
@@ -158,22 +156,22 @@ $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :MULTIHOMING ON");
 	}
 
 
-    if ( ( $CONFIG{$ID_COLLECTED}->{ICS} ) && ( $CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC}->($uri) eq 'OK' ) ) {
-        $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :uri ICS matched: $uri");
+    if ( ( $CONFIG{$ID_COLLECTED}->{FASTPATTERNS} ) && ( $CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC}->($uri) eq 'OK' ) ) {
+        $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID} :uri FASTPATTERNS matched: $uri");
         return DECLINED;
     }
     $APACHE_CODE= DECLINED;
-    if ( $CONFIG{$ID_COLLECTED}->{PROXY} ) {
+    if ( $CONFIG{$ID_COLLECTED}->{ENABLELWP} ) {
         $UA = __PACKAGE__->new;
         $UA->agent( join "/", __PACKAGE__, $VERSION );
 	 $APACHE_CODE=OK;
-        $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:  Build-in proxy actived");
+        $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}:  Build-in proxy actived");
         $r->handler("perl-script");
         $r->push_handlers( PerlHandler => \&proxy_handler );
     }
 ### before to enter in protected area 
 ###
-    return $APACHE_CODE  if ( $CONFIG{$ID_COLLECTED}->{DISABLEDCONTROL} );
+    return $APACHE_CODE  if ( $CONFIG{$ID_COLLECTED}->{DISABLEACCESSCONTROL} );
  
     ### raz cache level 1 
 # is this area protected
@@ -206,12 +204,12 @@ $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :MULTIHOMING ON");
 #NEW if the config is 'softcontrol'  no need cookie 
 if    ((!($CONFIG{$ID_COLLECTED}->{SOFTCONTROL}) and !$id))  {
         # No cookie found: redirect to portal
-        $messagelog = "$CONFIG{$ID_COLLECTED}->{ID_HANDLER} : No cookie found for " . $r->uri;
+        $messagelog = "$CONFIG{$ID_COLLECTED}->{HANDLERID} : No cookie found for " . $r->uri;
         $log->info($messagelog);
         return &Lemonldap::Handlers::Utilities::goPortal( $r, $CONFIG{$ID_COLLECTED}, 'c' );
     }
 my $label =$id||'SOFTCONTROL';
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: id session : $label");
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: id session : $label");
 
     # SESSIONS CACHE
    #cache  level 1 t est
@@ -224,21 +222,21 @@ $ID_SAVE =$id;
   my $cache1key  = "$id#$ID_COLLECTED";
           $ligne_h = $CLIENT{$cache1key} ;
    if ($ligne_h) { 
-        $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: match in cache level 1 for $cache1key") if $ligne_h;
+        $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: match in cache level 1 for $cache1key") if $ligne_h;
     }   else {
         # Level 2 test by IPC
-        $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: No match in cache level 1 for $cache1key");
-        if ( $CONFIG{$ID_COLLECTED}->{PATHDB} ) {    ####  We want use level 2 cache
+        $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: No match in cache level 1 for $cache1key");
+        if ( $CONFIG{$ID_COLLECTED}->{CACHEDBPATH} ) {    ####  We want use level 2 cache
 	    my $message;      
        ( $ligne_h, $message ) =
-              &Lemonldap::Handlers::Utilities::cache2( $CONFIG{$ID_COLLECTED}->{PATHDB},$$, $cache1key ); 
+              &Lemonldap::Handlers::Utilities::cache2( $CONFIG{$ID_COLLECTED}->{CACHEDBPATH},$$, $cache1key ); 
             $__STACK = 1;
-            $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:$message");
+            $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}:$message");
         }    ####  We want use level 2 cache
      # no match in cache level 1 and 2
        unless ($ligne_h) {    # no match in cache level 1 and 2
             $log->info(
-                "$CONFIG{$ID_COLLECTED}->{ID_HANDLER} :  Search  in cache level 3 for $id");
+                "$CONFIG{$ID_COLLECTED}->{HANDLERID} :  Search  in cache level 3 for $id");
 ######   search in backend cache
            my $dn;
             my $etat = 0;    # 0 = denied ,NULL = not found other values is OK ;
@@ -252,11 +250,11 @@ $ID_SAVE =$id;
                        unless ($controle->{string})  
                {  
                    if ($controle->{response})  {
-                $log->notice("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: controle: $controle->{dn}  $uri :DENIED ($controle->{response}) ");
+                $log->notice("$CONFIG{$ID_COLLECTED}->{HANDLERID}: controle: $controle->{dn}  $uri :DENIED ($controle->{response}) ");
 		return $controle->{response};
 
 	    }
-                $log->notice("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: $id ERROR TIMEOUT ");
+                $log->notice("$CONFIG{$ID_COLLECTED}->{HANDLERID}: $id ERROR TIMEOUT ");
             return &Lemonldap::Handlers::Utilities::goPortal( $r, $CONFIG{$ID_COLLECTED}, 't', $id ) ;
 	       }
 
@@ -268,15 +266,15 @@ $ID_SAVE =$id;
                            );          				
    
 	        $ligne_h = $header->{decoded} ;
-                        $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: $cache1key saving in cache level 2");	
+                        $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: $cache1key saving in cache level 2");	
 	    $__STACK = 0;	 
 	    &Lemonldap::Handlers::Utilities::save_session($cache1key,$ligne_h) ;
-               $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: SESSION FIND IN CACHE 3 FOR:$id");
-               $log->notice("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: controle: $controle->{dn} $uri :ACCEPTED");
+               $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: SESSION FIND IN CACHE 3 FOR:$id");
+               $log->notice("$CONFIG{$ID_COLLECTED}->{HANDLERID}: controle: $controle->{dn} $uri :ACCEPTED");
 
         }    ### end of search in cache 2 & 3
           $CLIENT{$cache1key} =$ligne_h ;
-    $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: $cache1key saving in cache level 1");   
+    $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: $cache1key saving in cache level 1");   
    }
 
     #  all is done for this phase  we can cache the header .
@@ -297,11 +295,11 @@ $ID_SAVE =$id;
 ###############  We can insert the header #####################
    
     $r->headers_in->add( $_header->{header} => $hcode );
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: header genered :$_header->{HEADER} => $hcode ");
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: header before encoding: $ligne_h");
-    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: header after encoding: $hcode");
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: header genered :$_header->{SENDHEADER} => $hcode ");
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: header before encoding: $ligne_h");
+    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: header after encoding: $hcode");
 }   else 
-{    $log->info("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:no header genered ");
+{    $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}:no header genered ");
 
 }
 
@@ -311,7 +309,6 @@ $ID_SAVE =$id;
 
    ### supprimer en prod ####  
    # my $l = Dumper (%CONFIG );
-   #  print STDERR "vide $l\n";
 return $APACHE_CODE
 
     
@@ -346,8 +343,8 @@ my $flag=0;
     $url ="/" unless $url;
 # replace formatin by formatout 
 #
-$log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: LWP ENGINE URL $url" );
-$log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: LWP ENGINE HOST $HOST" );
+$log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: LWP ENGINE URL $url" );
+$log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: LWP ENGINE HOST $HOST" );
 
 if ($CONFIG{$ID_COLLECTED}->{MOTIFOUT}) {
    if ($CONFIG{$ID_COLLECTED}->{MOTIFOUT}=~ /ANYWHERE/) {
@@ -363,7 +360,7 @@ $suite ="/".$suite  unless $suite=~ /^\//;
  $suite ="/" unless $suite;
 $url = $suite;
 
-$log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:LWP ANYWHERE DESTINATION actived $host_target --   $suite " );
+$log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}:LWP ANYWHERE DESTINATION actived $host_target --   $suite " );
     $CONFIG{$ID_COLLECTED}->{BASEPRIV} = "http://$host_target"; 
   }  else {  
     $url =~ s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}/$CONFIG{$ID_COLLECTED}->{MOTIFOUT}/;
@@ -376,7 +373,7 @@ $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:LWP ANYWHERE DESTINATION activ
     my $uuu      = $url;
     $url = $CONFIG{$ID_COLLECTED}->{BASEPRIV}.$uuu;
     $log->info(
-        "$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: URLPRIV ACTIVED: $url  
+        "$CONFIG{$ID_COLLECTED}->{HANDLERID}: URLPRIV ACTIVED: $url  
                      URLPUB REQUESTED : $url_init"
     );
 
@@ -416,24 +413,24 @@ $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:LWP ANYWHERE DESTINATION activ
 
 
 
-    my $messagelog = "$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: request " . $request->as_string();
+    my $messagelog = "$CONFIG{$ID_COLLECTED}->{HANDLERID}: request " . $request->as_string();
     $log->debug($messagelog);
-    if ( $CONFIG{$ID_COLLECTED}->{RECURSIF} ) {
-        $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: RECURSIF LWP DESACTIVED");
+    if ( $CONFIG{$ID_COLLECTED}->{CHASEREDIRECT} ) {
+        $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}: RECURSIF LWP DESACTIVED");
         my @tt = ('HEAD');
         $UA->requests_redirectable( \@tt );
     }
  ###  deal this lwptimeout :
     if ($CONFIG{$ID_COLLECTED}->{LWPTIMEOUT}) {
-        $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:LWP TIMEOUT :$CONFIG{$ID_COLLECTED}->{LWPTIMEOUT} armed");
+        $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}:LWP TIMEOUT :$CONFIG{$ID_COLLECTED}->{LWPTIMEOUT} armed");
 	$UA->timeout($CONFIG{$ID_COLLECTED}->{LWPTIMEOUT});
     }
     # LWP proxy
     # I 'll forward  on an  external proxy
-    if ( $CONFIG{$ID_COLLECTED}->{PROXYEXT} ) {
-        $log->debug("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}:OUTPUT PROXY:$CONFIG{$ID_COLLECTED}->{PROXYEXT}");
+    if ( $CONFIG{$ID_COLLECTED}->{APPLPROXY} ) {
+        $log->debug("$CONFIG{$ID_COLLECTED}->{HANDLERID}:OUTPUT PROXY:$CONFIG{$ID_COLLECTED}->{APPLPROXY}");
 
-        $UA->proxy( http => $CONFIG{$ID_COLLECTED}->{PROXYEXT} );
+        $UA->proxy( http => $CONFIG{$ID_COLLECTED}->{APPLPROXY} );
     }
     if ($url =~ /_lemonldap_debug/ ) {
          $r->content_type('text/html');
@@ -487,7 +484,7 @@ END
 #
     my $response = $UA->request($request);
 ### begin: somes bad requests have bad header .
-    $messagelog = "$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: response " .$response->as_string();
+    $messagelog = "$CONFIG{$ID_COLLECTED}->{HANDLERID}: response " .$response->as_string();
 
 
     $log->debug($messagelog);
@@ -560,7 +557,7 @@ $html = &Lemonldap::Handlers::Core::ParseHtml (html => $html,
   $r->content_type('text/html') unless $$content;
     $r->send_http_header;
     $r->print( $html || $response->error_as_HTML );
-    $log->notice("$CONFIG{$ID_COLLECTED}->{ID_HANDLER}: $url response sent");
+    $log->notice("$CONFIG{$ID_COLLECTED}->{HANDLERID}: $url response sent");
     return OK;
 
 }
