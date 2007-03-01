@@ -5,57 +5,63 @@ our ( @ISA, $VERSION, @EXPORTS );
 $VERSION = '2.00';
 our $VERSION_LEMONLDAP = "2.0";
 our $VERSION_INTERNAL  = "2.0";
+
 sub get {
-    my $class = shift;
-    my %_param =@_;
+    my $class  = shift;
+    my %_param = @_;
     my $profil = $_param{profil};
-    my $dn = $_param{dn};
-      my $header= $_param{config}->{SENDHEADER} ||'Authorization';
+    my $dn     = $_param{dn};
+    my $header = $_param{config}->{SENDHEADER} || 'Authorization';
     my $self;
-    my $ligne_h ;
-    if ($profil eq  '_ALLOW_') {$profil="" ; }
-   if ($profil =~ /^uid/)  {
-$ligne_h = $profil;
-}  else 
-         {
-	     $ligne_h = $dn;
-	     if (defined($profil)) {
-		 $ligne_h.=":$profil";
-	     } 
-	 }
-    $self->{decoded} = "Basic %b64%$ligne_h%b64%" ; 
-    $self->{clair} =  "Basic $ligne_h" ;
-     bless $self,$class;
-return $self; 
+    my $ligne_h;
+    if ( $profil eq '_ALLOW_' ) { $profil = ""; }
+
+    if ( $profil =~ /^uid/ ) {
+        $ligne_h = $profil;
+    }
+    else {
+        $ligne_h = $dn;
+        if ( defined($profil) ) {
+            $ligne_h .= ":$profil";
+        }
+    }
+    $self->{decoded} = "Basic %b64%$ligne_h%b64%";
+    $self->{clair}   = "Basic $ligne_h";
+    bless $self, $class;
+    return $self;
 }
+
 sub forge {
-  my $class = shift;
-    my %_param =@_;
-     my $line= $_param{line};
-  my $self;
-      $self->{decoded} = $line ;
-my ($user) = $line =~ /(uid.+?),/;
-   $self->{user} =$user;   
-my $header= $_param{config}->{SENDHEADER} ||'Authorization';
- return 0 if ($header  eq 'NONE' ) ;
-     
-  ( my $b,my $e)   = $line=~/(.+)%b64%(.+)%b64%/;
-  if ($e )  {
-   $e =  encode_base64( $e, '' ) ;
-   $line =~  s/%b64%.+%b64%/$e/ ;   
- }  else  {
-	 # for previous version 
-  ( my $b,my $e)   = $line=~/(.+?)\s(.+)/;
-   $e =  encode_base64( $e, '' ) ;
-   $line =~  s/ (.+)$/ $e/ ;   
-}	  
-	 
+    my $class  = shift;
+    my %_param = @_;
+    my $line   = $_param{line};
+    my $self;
+    $self->{decoded} = $line;
+    my ($user) = $line =~ /(uid.+?),/;
+    $self->{user} = $user;
+    my $header = $_param{config}->{SENDHEADER} || 'Authorization';
+    return 0 if ( $header eq 'NONE' );
+
+    ( my $b, my $e ) = $line =~ /(.+)%b64%(.+)%b64%/;
+    if ($e) {
+        $e = encode_base64( $e, '' );
+        $line =~ s/%b64%.+%b64%/$e/;
+    }
+    else {
+
+        # for previous version
+        ( my $b, my $e ) = $line =~ /(.+?)\s(.+)/;
+        $e = encode_base64( $e, '' );
+        $line =~ s/ (.+)$/ $e/;
+    }
+
     $self->{content} = $line;
-       $self->{header} =$header;
-    bless $self,$class;
-return $self;
+    $self->{header}  = $header;
+    bless $self, $class;
+    return $self;
 }
 1;
+
 =pod
 
 =for html <center> <H1> Lemonldap::Handlers::AuthorizationHeader </H1></center> 
@@ -139,5 +145,4 @@ Shervin Ahmadi (MINEFI/DGI)
   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 =cut
-
 

@@ -3,9 +3,9 @@ use strict;
 #A retirer en prod
 use Data::Dumper;
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '2.00';
-our $VERSION_LEMONLDAP = "2.0";
-our $VERSION_INTERNAL  = "2.0";
+$VERSION = '3.1.0';
+our $VERSION_LEMONLDAP = "3.1.0";
+our $VERSION_INTERNAL  = "3.1.0";
 
 sub locationRules  {
     my %param = @_;
@@ -17,6 +17,7 @@ my $host = $param{'host'};
 my $target =$param{'target'};
 my $_session = Lemonldap::Handlers::Session->get ('id' => $id ,
                                                           'config' => $config) ;  
+
 
 if (keys(%{$_session}) == 0){
 return 0;
@@ -113,7 +114,7 @@ if ( time() > $sessExpTime ) {
 
 	if (keys(%{$HashSession}) == 0 ){
 #the memcached is unreachable
-$log->warn("$config->{HANDLERID}: The central memcached is unreachable.Please check if your server is on or if your XML file is correct.");
+$log->warn("$config->{HANDLERID}: The central memcached is unreachable.Please check if your server is on or if your configuration file is correct.");
 		unless($config->{SERVERS}->{'local'}){
 $log->err("$config->{HANDLERID}: Can't acces to any memcached server => Internal error");
 #On a effectué une recherche infructueuse sur le serveur principal et il n'y a pas de serveur loca

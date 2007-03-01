@@ -2,9 +2,9 @@ package Lemonldap::Handlers::Memsession;
 use strict;
 use Apache::Session::Memorycached;
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '2.00';
-our $VERSION_LEMONLDAP = "2.0";
-our $VERSION_INTERNAL  = "2.0";
+$VERSION = '3.1.0';
+our $VERSION_LEMONLDAP = "3.1.0";
+our $VERSION_INTERNAL  = "3.1.0";
 sub get               
 {
     my $class =shift;
