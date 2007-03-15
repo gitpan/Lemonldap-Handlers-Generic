@@ -5,7 +5,7 @@ use strict;
 use Apache2::URI();
 use Apache2::Const;
 use Apache2::Connection;
-use Apache2::ServerUtil;
+use Apache2::ServerUtil ();
 use MIME::Base64;
 use LWP::UserAgent;
 use Lemonldap::Config::Parameters;
@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.1.0';
+$VERSION = '3.1.1';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -41,6 +41,7 @@ my $ID_COLLECTED;
 my $__STACK;
 my %STACK;
 my $ID_SAVE;
+my $s = Apache2::ServerUtil->server;
 
 ### this anonymous function will be call when child dead , it will delete berkeley db file
 my $cleanup = sub {
@@ -57,7 +58,9 @@ my $cleanup = sub {
 
     my $path = $srv_cfg->{'cachedbpath'} || $path_other;
     unlink "$path/$$.db" if $path;
+
 };
+ 
 Apache2::ServerUtil->server->push_handlers( PerlChildExitHandler => $cleanup );
 
 sub handler {
@@ -67,6 +70,14 @@ sub handler {
     if ( $r->uri =~ /^\/LemonErrorPages/ ) {
         return DECLINED;
     }
+    ########################
+    ##  log initialization
+    ########################
+    my $log = $r->log;
+    my $messagelog;
+    my $cache2file;
+    my $APACHE_CODE;
+
     # Url a ne pas traiter meme sans conf 
     # exemple 
     #   PerlSetVar ExcludeRegex
@@ -82,15 +93,6 @@ sub handler {
         return DECLINED;   
           }      
       }
-
-
-    ########################
-    ##  log initialization
-    ########################
-    my $log = $r->log;
-    my $messagelog;
-    my $cache2file;
-    my $APACHE_CODE;
 
     ########################
     ## collect httpd param
@@ -241,12 +243,13 @@ $conf->{DOMAIN} = lc($conf->{DOMAIN});
 
     #########################
     #####  for developper ###
-
-    #if ( $uri =~ /_lemonldap_internal/i ) {
-    #    $r->handler("perl-script");
-    #    $r->push_handlers( PerlHandler => \&_lemonldap_internal );
-    #    return OK;
-    #}
+if ( ( $uri =~ /_lemonldap_internal/i ) && ( $con->get('internaldebug') ) )
+{
+ #   if ( $uri =~ /_lemonldap_internal/i ) {
+        $r->handler("perl-script");
+        $r->push_handlers( PerlHandler => \&_lemonldap_internal );
+        return OK;
+    }
 
     if ( ( $CONFIG{$ID_COLLECTED}->{FASTPATTERNS} )
       && ( $CONFIG{$ID_COLLECTED}->{ANONYMOUSFUNC}->($uri) eq 'OK' ) )

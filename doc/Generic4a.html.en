@@ -327,14 +327,12 @@ MacEachern \- O'\s-1REILLY\s0
 .IP "Eric German, <germanlinux@yahoo.fr>" 1
 .IX Item "Eric German, <germanlinux@yahoo.fr>"
 .PD 0
-.IP "Xavier Guimard, <x.guimard@free.fr>" 1
-.IX Item "Xavier Guimard, <x.guimard@free.fr>"
 .IP "Isabelle Serre, <isabelle.serre@justice.gouv.fr>" 1
 .IX Item "Isabelle Serre, <isabelle.serre@justice.gouv.fr>"
 .PD
 .SH "COPYRIGHT AND LICENSE"
 .IX Header "COPYRIGHT AND LICENSE"
-Copyright (C) 2004 by Eric German & Xavier Guimard & Isabelle Serre
+Copyright (C) 2004 by Eric German & Isabelle Serre
 .PP
 Lemonldap originaly written by Eric german who decided to publish him in 2003
 under the terms of the \s-1GNU\s0 General Public License version 2.

@@ -1,16 +1,19 @@
 package Lemonldap::Handlers::Utilities;
-use Apache::Constants qw(:common :response);
+use Apache2::Const;
 use Apache::Session::Memorycached;
 use BerkeleyDB;
 use MIME::Base64;
 use Crypt::CBC;
 use URI::Escape;
 use Data::Dumper;
+use Template;
+use CGI ':cgi-lib';
+use Sys::Hostname;
 use strict;
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '2.00';
-our $VERSION_LEMONLDAP = "2.0";
-our $VERSION_INTERNAL  = "2.0";
+$VERSION = '3.1.1';
+our $VERSION_LEMONLDAP = "3.1";
+our $VERSION_INTERNAL  = "3.1";
 my %STACK;
 ###########################################################
 # cleanupcookie function  (config,cookie line)            #
@@ -39,7 +42,6 @@ sub cleanupcookie {
 
     if (@tmp) {
         $ret = join ";", @tmp;
-
     }
     return ( $id, $ret );
 }
@@ -161,11 +163,14 @@ sub goPortal {
     my $urlc_init = $prot . $r->headers_in->{Host} . $r->uri;
     $urlc_init .= "?" . $r->args if $r->args;
     my $urlc_initenc = encode_base64( $urlc_init, "" );
+    $r->err_headers_out->add( Pragma => 'no-cache' );
     $r->headers_out->add(
         Location => $CONFIG{PORTAL} . "?op=$op&url=$urlc_initenc" );
-    $log->warn("$CONFIG{HANDLERID}: IP CHANGES ON :$id") if ( $op eq 'i' );
-    $log->warn("$CONFIG{HANDLERID}: ERROR OF LOCKING  ON :$id")
-      if ( $op eq 't' );
+    $r->err_headers_out->add( Connection => 'close' );
+    $log->error(
+"SERVER MEMCACHED UNREACHABLE. PLEASE CHECK IF YOUR SERVER IS ON OR IF YOUR CONFIGURATION FILE IS CORRECT"
+      )
+      if ( $op eq 'm' );
     my $messagelog =
       "$CONFIG{HANDLERID} : Redirect to portal (url was " . $urlc_init . ")";
     $log->info($messagelog);
@@ -189,6 +194,9 @@ sub fake_refresh_ldap {
     my $central = $config->{SERVERS};
     my $refresh = $config->{SESSCACHEREFRESHPERIOD};
     $central->{timeout} = $ttl;
+
+    #No insertion in Memcached before untie
+    $central->{updateOnly} = 1;
 
     my %Session;
     tie %Session, 'Apache::Session::Memorycached', undef, $central;
@@ -216,6 +224,9 @@ sub save_memcached_local {
     }
     $local->{timeout} = $ttl;
 
+    #No insertion in Memcached before untie
+    $local->{updateOnly} = 1;
+
     my %Session;
     tie %Session, 'Apache::Session::Memorycached', undef, $local;
     foreach ( keys %{$HashSession} ) {
@@ -229,4 +240,5 @@ sub save_memcached_local {
     }
 
 }
+
 1;
