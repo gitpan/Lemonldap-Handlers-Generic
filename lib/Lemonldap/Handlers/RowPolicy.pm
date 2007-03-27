@@ -1,9 +1,9 @@
-package Lemonldap::Handlers::MatrixPolicy;
+package Lemonldap::Handlers::RowPolicy;
 use strict;
 use warnings;
 our $VERSION = '3.1.1';
 our $VERSION_LEMONLDAP = "3.1";
-our $VERSION_INTERNAL  = "3.1";
+our $VERSION_INTERNAL  = "1.0";
 
 sub get                
 {
@@ -18,19 +18,18 @@ sub get
 	bless $self,$class;
 	return $self;
    }
-
    my $complement;   
    my $dn = $session->{dn};
    $dn =~ s/ //g;
-   my $major = $config->{ORGANIZATION};
-   if( !defined($major) ){
-	$major = "authz_headers";
-   }
+#   my $major = $config->{ORGANIZATION};
+#   if( !defined($major) ){
+#	$major = "authz_headers";
+#   }
 #   my $minor = lc($config->{APPLCODE});
    my $minor = $config->{APPLCODE};
-     if  ( defined($major) && defined($minor) &&  exists($session->{$major}->{$minor}))  
+     if  ( defined($minor) &&  exists($session->{$minor}))  
    {
-      $complement = $session->{$major}->{$minor};
+      $complement = $session->{$minor};
      #### begin:  here for he compatibility  with older lemonldap
      $complement =~  s/#.*//;
      ###  end  :  here for he compatibility  with older lemonldap

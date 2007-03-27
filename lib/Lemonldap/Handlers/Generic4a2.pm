@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.1.1';
+$VERSION = '3.1.2';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -1235,15 +1235,13 @@ MacEachern - O'REILLY
 
 =item Eric German, E<lt>germanlinux@yahoo.frE<gt>
 
-=item Xavier Guimard, E<lt>x.guimard@free.frE<gt>
-
 =item Isabelle Serre, E<lt>isabelle.serre@justice.gouv.frE<gt>
 
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004 by Eric German E<amp> Xavier Guimard E<amp> Isabelle Serre
+Copyright (C) 2004 by Eric German E<amp> Isabelle Serre
 
 Lemonldap originaly written by Eric german who decided to publish him in 2003
 under the terms of the GNU General Public License version 2.

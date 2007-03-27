@@ -13,6 +13,7 @@ lib/Lemonldap/Handlers/Core.pm
 lib/Lemonldap/Handlers/Generic.pm
 lib/Lemonldap/Handlers/Generic4a2.pm
 lib/Lemonldap/Handlers/MatrixPolicy.pm
+lib/Lemonldap/Handlers/RowPolicy.pm
 lib/Lemonldap/Handlers/Memsession.pm
 lib/Lemonldap/Handlers/RewriteHTML.pm
 lib/Lemonldap/Handlers/Utilities.pm
