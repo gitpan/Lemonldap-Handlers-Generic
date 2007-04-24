@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.1.2';
+$VERSION = '3.2.0';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -730,11 +730,11 @@ s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}/$CONFIG{$ID_COLLECTED}->{MOTIFOUT}/;
 
     # copy POST data, if any
     if ( $r->method eq 'POST' ) {
-        my $len = $r->headers_in('Content-length');
+        my $len = $r->headers_in->{'Content-length'};
         my $buf;
         $r->read( $buf, $len );
         $request->content($buf);
-        $request->content_type( $r->headers_in('Content-Type') );
+        $request->content_type( $r->headers_in->{'Content-Type'} );
     }
 
     ###begin: some modification like mod_proxy does
