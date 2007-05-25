@@ -15,5 +15,7 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
        - litles correction 
 3.1.2  Mar 27 2007        
        - Add RowPolicy 
+3.3.0  May 25 2007        
+       - Correct bug on empty post request  
        
        
