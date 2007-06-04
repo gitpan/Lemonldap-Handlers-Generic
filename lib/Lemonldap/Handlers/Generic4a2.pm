@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.3.0';
+$VERSION = '3.4.0';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -267,6 +267,7 @@ if ( ( $uri =~ /_lemonldap_internal/i ) && ( $con->get('internaldebug') ) )
           "$CONFIG{$ID_COLLECTED}->{HANDLERID}:  Build-in proxy actived");
         $r->handler("perl-script");
         $r->push_handlers( PerlHandler => \&proxy_handler );
+	$APACHE_CODE= OK ; 
     }
 
     ### before to enter in protected area 
