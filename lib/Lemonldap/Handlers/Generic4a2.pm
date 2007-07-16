@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.4.0';
+$VERSION = '3.5.0';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -748,7 +748,15 @@ s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}/$CONFIG{$ID_COLLECTED}->{MOTIFOUT}/;
         ( my $priv ) = $CONFIG{$ID_COLLECTED}->{BASEPRIV} =~ /:\/\/(.+)/;
         ( my $pub ) = $CONFIG{$ID_COLLECTED}->{BASEPUB} =~ /:\/\/(.+)/;
         $host =~ s/$pub/$priv/;
+        $host =~ s/:\d+$// ;
+
         $request->header( 'Host' => $host );
+
+#DEBUG 16/07/2007
+
+print STDERR "DEBUG ADONIS:  PRIV: $priv PUB:  $pub  HOST_TARGET : $host_target " ;
+#
+#END
 
     }
 
@@ -869,16 +877,44 @@ END
     ### begin: I correct on the fly some incomming header like mod_proxy does
     if ( $response->header('Location') ) {
         my $h = $response->header('Location');
+
+
+#Patch 16/07/2007 pour traitement du port dans le Location des 302
+
+my $trait_loc;
+	
+	if (( $h =~ /:\d+$/) && ($CONFIG{$ID_COLLECTED}->{BASEPRIV} =~ /:\d+$/ ) )  {
         $h =~
          s/$CONFIG{$ID_COLLECTED}->{BASEPRIV}/$CONFIG{$ID_COLLECTED}->{BASEPUB}/
           unless $flag;
-        ;
+	$trait_loc = "Port dans Location ET Basepriv \n" ;
+	}elsif ( !( $h =~ /:\d+$/) && ! ($CONFIG{$ID_COLLECTED}->{BASEPRIV} =~ /:\d+$/ ) ) {
+
+        $h =~ s/$CONFIG{$ID_COLLECTED}->{BASEPRIV}/$CONFIG{$ID_COLLECTED}->{BASEPUB}/
+		           unless $flag;
+       $trait_loc = "Aucun Port\n " ;	
+	} else {
+		
+	(my $privreduct ) = $CONFIG{$ID_COLLECTED}->{BASEPRIV} =~ /^(.+):\d+$/ ;
+	   $h =~ s/$privreduct/$CONFIG{$ID_COLLECTED}->{BASEPUB}/
+			                     unless $flag;
+        $trait_loc = "Port dans Basepriv uniquement \n" ;
+
+	}
+
+#print STDERR "Traitement Location : " . $trait_loc ;
+#FIn de patch
 
         if ($flag) {
             $h =~ s/:\/\//:\/\/$HOST\//;
             $h =~ s/http:/https:/g;
         }
         $response->header( 'Location' => $h );
+    
+#DEBUG  ADO
+#
+print STDERR "DEBUG ADO Location : FLAG: $flag PRIV : $CONFIG{$ID_COLLECTED}->{BASEPRIV} PUB: $CONFIG{$ID_COLLECTED}->{BASEPUB} " ;
+    
     }
 
     ############  a voir ######################## 
