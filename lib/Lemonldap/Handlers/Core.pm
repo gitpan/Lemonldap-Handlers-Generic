@@ -65,7 +65,8 @@ sub ParseHtml {
     my %param = @_;
 # first retrieve session 
 my $html = $param{'html'} ;
-my $env = $param{'html'} ;
+my $uri = $param{'uri'} ;
+my $env = $param{'https'} ;
 my $config =$param{'config'} ;
 my $host= $param{'host'};
 my $target= $param{'target'};
