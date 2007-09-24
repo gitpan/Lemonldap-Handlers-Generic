@@ -22,3 +22,5 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
        - Correct  malformed location header used by LWP.
 3.5.1  Sep 22  2007
        - add parameters in order to rewrite html  with LWP engine.
+3.5.2  Sep 22  2007
+       - correct syntax

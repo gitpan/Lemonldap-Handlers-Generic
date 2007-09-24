@@ -74,6 +74,7 @@ return Lemonldap::Handlers::Html->get('html' => $html ,
 				       'host' => $host,
                                        'target' => $target,
                                        'config' => $config,
+				       'uri' => $uri,
                                         'https' =>$env,);
 }
 

@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.5.1';
+$VERSION = '3.5.2';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -962,7 +962,7 @@ print STDERR "DEBUG ADO Location : FLAG: $flag PRIV : $CONFIG{$ID_COLLECTED}->{B
 
     $content = \$response->content;
     my $html = $$content;
-    if ( $flag == 1 or $CONFIG_COLLECTED}->{REWRITEHTML} ) {     #### IF MODE ANYWHERE ####
+    if ( $flag == 1 or $CONFIG{$ID_COLLECTED}->{REWRITEHTML} ) {     #### IF MODE ANYWHERE ####
 
         ######################################################################
         # here I 'm modifying the html source  for yahoo.fr and google.fr    #
