@@ -72,9 +72,9 @@ my $host= $param{'host'};
 my $target= $param{'target'};
 return Lemonldap::Handlers::Html->get('html' => $html ,
 				       'host' => $host,
+				       'uri' => $uri, 
                                        'target' => $target,
                                        'config' => $config,
-				       'uri' => $uri,
                                         'https' =>$env,);
 }
 

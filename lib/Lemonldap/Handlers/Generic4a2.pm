@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.5.2';
+$VERSION = '3.5.3';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -348,9 +348,16 @@ if ( ( $uri =~ /_lemonldap_internal/i ) && ( $con->get('internaldebug') ) )
     {
         if ( time() > $timeout ) {
             $log->warn("SESSION EXPIRED FOR INACTIVITY");
-            return &Lemonldap::Handlers::Utilities::goPortal( $r,
+            if ($CONFIG{$ID_COLLECTED}->{URLCDATIMEOUT}) {
+	        return &Lemonldap::Handlers::Utilities::goPortal( $r,
+              $CONFIG{$ID_COLLECTED}, 'x', $id );
+	    
+	    }  else 
+	            {
+	    return &Lemonldap::Handlers::Utilities::goPortal( $r,
               $CONFIG{$ID_COLLECTED}, 't', $id );
         }
+	}
     }
 
     # SESSIONS CACHE
@@ -617,13 +624,12 @@ my $sep = "_";
         }
         else {
             $log->info(
-              "The inactivity timeout  has been positionned at O!!!! \n");
+              "The inactivity timeout  has been positionned at O!!!!");
         }
     }
     else {
         $log->info(
-          "The inactivity timeout hasn't been set. You can do it in your config  file. \n
-        Usage : InactivityTimeOut = '360' <-- time in second !-->\n" );
+          "The inactivity timeout hasn't been set." );
     }
 
     #</TEST TIMEOUT>
@@ -754,7 +760,7 @@ s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}/$CONFIG{$ID_COLLECTED}->{MOTIFOUT}/;
 
 #DEBUG 16/07/2007
 
-print STDERR "DEBUG ADONIS:  PRIV: $priv PUB:  $pub  HOST_TARGET : $host_target " ;
+#print STDERR "DEBUG ADONIS:  PRIV: $priv PUB:  $pub  HOST_TARGET : $host_target " ;
 #
 #END
 
@@ -877,7 +883,10 @@ END
     ### begin: I correct on the fly some incomming header like mod_proxy does
     if ( $response->header('Location') ) {
         my $h = $response->header('Location');
-
+    ###  In case of multihoming context , sometimes location is  not a well know location ,so I must adjust this handly 
+         if ($CONFIG{$ID_COLLECTED}->{SOURCEREDIRECTION}) {
+         $h=~ s/$CONFIG{$ID_COLLECTED}->{SOURCEREDIRECTION}/$CONFIG{$ID_COLLECTED}->{TARGETREDIRECTION}/;
+          }
 
 #Patch 16/07/2007 pour traitement du port dans le Location des 302
 
@@ -911,9 +920,6 @@ my $trait_loc;
         }
         $response->header( 'Location' => $h );
     
-#DEBUG  ADO
-#
-print STDERR "DEBUG ADO Location : FLAG: $flag PRIV : $CONFIG{$ID_COLLECTED}->{BASEPRIV} PUB: $CONFIG{$ID_COLLECTED}->{BASEPUB} " ;
     
     }
 

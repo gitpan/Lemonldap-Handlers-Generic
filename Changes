@@ -24,3 +24,7 @@ Revision history for Perl extension Lemonldap::Handlers::Generic.
        - add parameters in order to rewrite html  with LWP engine.
 3.5.2  Sep 22  2007
        - correct syntax
+3.5.3  Oct 24 2007
+       - add management timeout in case of CDA 
+       - add sourceredirection and targetredirection (location header)       
+       

@@ -11,9 +11,9 @@ use CGI ':cgi-lib';
 use Sys::Hostname;
 use strict;
 our ( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.1.1';
-our $VERSION_LEMONLDAP = "3.1";
-our $VERSION_INTERNAL  = "3.1";
+$VERSION = '3.5.3';
+our $VERSION_LEMONLDAP = "3.5.3";
+our $VERSION_INTERNAL  = "3.5.3";
 my %STACK;
 ###########################################################
 # cleanupcookie function  (config,cookie line)            #
@@ -164,8 +164,13 @@ sub goPortal {
     $urlc_init .= "?" . $r->args if $r->args;
     my $urlc_initenc = encode_base64( $urlc_init, "" );
     $r->err_headers_out->add( Pragma => 'no-cache' );
+    if ($CONFIG{URLCDATIMEOUT}  && $op eq 'x' ) {
+    $r->headers_out->add(
+        Location => $CONFIG{URLCDATIMEOUT} . "?op=$op&url=$urlc_initenc" );
+    else {
     $r->headers_out->add(
         Location => $CONFIG{PORTAL} . "?op=$op&url=$urlc_initenc" );
+    }
     $r->err_headers_out->add( Connection => 'close' );
     $log->error(
 "SERVER MEMCACHED UNREACHABLE. PLEASE CHECK IF YOUR SERVER IS ON OR IF YOUR CONFIGURATION FILE IS CORRECT"
