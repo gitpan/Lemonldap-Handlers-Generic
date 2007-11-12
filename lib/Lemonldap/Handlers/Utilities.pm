@@ -167,7 +167,7 @@ sub goPortal {
     if ($CONFIG{URLCDATIMEOUT}  && $op eq 'x' ) {
     $r->headers_out->add(
         Location => $CONFIG{URLCDATIMEOUT} . "?op=$op&url=$urlc_initenc" );
-    else {
+    } else {
     $r->headers_out->add(
         Location => $CONFIG{PORTAL} . "?op=$op&url=$urlc_initenc" );
     }
