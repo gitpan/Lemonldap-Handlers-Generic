@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.5.4';
+$VERSION = '3.5.5';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -716,11 +716,15 @@ sub proxy_handler {
             $CONFIG{$ID_COLLECTED}->{BASEPRIV} = "http://$host_target";
         }
         else {
-            $url =~
+	if  ($CONFIG{$ID_COLLECTED}->{MOTIFOUT} eq '/' )  {
+    $url =~
+s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}//;
+      }  else {
+  $url =~
 s/$CONFIG{$ID_COLLECTED}->{MOTIFIN}/$CONFIG{$ID_COLLECTED}->{MOTIFOUT}/;
-
-        }
-    }
+              }
+   }
+   }
     $url .= "?" . $r->args if ( $r->args );
     my $url_init = $CONFIG{$ID_COLLECTED}->{BASEPUB} . $url;
     my $uuu      = $url;
