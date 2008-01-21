@@ -57,7 +57,7 @@ my $reponse= Lemonldap::Handlers::Header->forge('line' => $result ,
 						'config' => $config,);
     my $h;
     if ( $reponse != 0 ){	
-	$h ={header => $reponse->{header},content => $reponse->{content} ,decoded =>$reponse->{clair} };
+	$h ={header => $reponse->{header},content => $reponse->{content} ,decoded =>$reponse->{clair} ,user =>$reponse->{user}};
     }
     return $h;
 }
