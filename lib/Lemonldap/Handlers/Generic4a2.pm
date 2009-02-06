@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.5.6';
+$VERSION = '3.5.7';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 

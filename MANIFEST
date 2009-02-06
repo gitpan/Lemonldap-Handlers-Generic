@@ -16,6 +16,7 @@ lib/Lemonldap/Handlers/MatrixPolicy.pm
 lib/Lemonldap/Handlers/RowPolicy.pm
 lib/Lemonldap/Handlers/Memsession.pm
 lib/Lemonldap/Handlers/RewriteHTML.pm
+lib/Lemonldap/Handlers/Nobase64.pm
 lib/Lemonldap/Handlers/Utilities.pm
 Makefile.PL
 MANIFEST
