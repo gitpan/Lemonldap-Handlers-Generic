@@ -57,7 +57,7 @@ my $reponse= Lemonldap::Handlers::Header->forge('line' => $result ,
 						'config' => $config,);
     my $h;
     if ( $reponse != 0 ){	
-	$h ={header => $reponse->{header},content => $reponse->{content} ,decoded =>$reponse->{clair} ,user =>$reponse->{user}};
+	$h ={header => $reponse->{header},content => $reponse->{content} ,decoded =>$reponse->{decoded} ,user =>$reponse->{user}};
     }
     return $h;
 }
@@ -211,6 +211,7 @@ sub  get {
     my %_param = @_;
     $_param{config}->{'PLUGINHEADER'}= 'Lemonldap::Handlers::AuthorizationHeader' unless $_param{config}->{'PLUGINHEADER'} ;
     my $api = $_param{config}->{'PLUGINHEADER'} ;
+    print STDERR "ERIC A SUP $api\n";
     eval "use $api;"; 
     my $header =$api->get(%_param) ;
     # bless $header , $class; 

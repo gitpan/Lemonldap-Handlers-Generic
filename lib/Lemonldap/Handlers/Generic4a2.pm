@@ -24,7 +24,7 @@ use Sys::Hostname;
 #use Data::Dumper;
 #### common declaration #######
 our( @ISA, $VERSION, @EXPORTS );
-$VERSION = '3.5.7';
+$VERSION = '3.5.8';
 our $VERSION_LEMONLDAP = "3.1.0";
 our $VERSION_INTERNAL  = "3.1.0";
 
@@ -514,7 +514,7 @@ if ( defined( $CONFIG{$ID_COLLECTED}->{SESSCACHEREFRESHPERIOD} ) ) {
 		 		 $log->info("$CONFIG{$ID_COLLECTED}->{HANDLERID}: SessExpTime expired. Caches need to be refresh at all level");
 		 		 if ($return_code == 1){
 		 		 		 #Rafraichissement LDAP
-		 		 		 #A modifier pour les versions ulte©riers
+		 		 		 #A modifier pour les versions ulteï¿½riers
 		 		 		 #
 		 		 		 #
 
@@ -641,13 +641,13 @@ my $sep = "_";
         ###############  We can insert the header #####################
 
         $r->headers_in->add( $_header->{header} => $hcode );
-        $log->info(
+        $log->debug(
 		 "$CONFIG{$ID_COLLECTED}->{HANDLERID}: header genered :$_header->{header} => $hcode "
         );
         $log->info(
-        "$CONFIG{$ID_COLLECTED}->{HANDLERID}: header before encoding: $ligne_h"
+        "$CONFIG{$ID_COLLECTED}->{HANDLERID}: header before encoding: $_header->{decoded}"
         );
-        $log->info(
+        $log->debug(
           "$CONFIG{$ID_COLLECTED}->{HANDLERID}: header after encoding: $hcode"
         );
     }
